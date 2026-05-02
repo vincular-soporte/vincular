@@ -198,7 +198,7 @@ tbody tr:hover td{background:#F8FDFB;}
 .act-btn:hover{background:var(--primary-xlight);border-color:var(--primary);}
 .act-btn.del:hover{background:#FEF2F2;border-color:#FCA5A5;}
 .pc-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;}
-.pcard{background:var(--bg-card);border-radius:12px;border:1px solid var(--border);padding:18px;cursor:pointer;transition:box-shadow .15s,border-color .15s;}
+.pcard{background:var(--bg-card);border-radius:12px;border:1px solid var(--border);padding:18px;cursor:pointer;transition:box-shadow .15s,border-color .15s;position:relative;overflow:hidden;}
 .pcard:hover{box-shadow:0 3px 16px rgba(13,92,74,.1);border-color:var(--primary-light);}
 .pcard-top{display:flex;align-items:center;gap:12px;margin-bottom:14px;}
 .pcard-av{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0;}
@@ -285,6 +285,7 @@ tbody tr:hover td{background:#F8FDFB;}
 .overlay-screen.hidden{opacity:0;pointer-events:none;}
 .spin{width:26px;height:26px;border-radius:50%;border:3px solid var(--primary-light);border-top-color:var(--primary);animation:sp .7s linear infinite;}
 @keyframes sp{to{transform:rotate(360deg);}}
+@keyframes floatBalloon{0%,100%{transform:translateY(0) rotate(-3deg);}50%{transform:translateY(-12px) rotate(3deg);}}
 .setup-card{background:#fff;border-radius:16px;border:1px solid var(--border);max-width:580px;width:100%;padding:36px 32px;}
 .setup-step{display:flex;gap:14px;margin-bottom:18px;align-items:flex-start;}
 .step-num{width:26px;height:26px;border-radius:50%;background:var(--primary);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
@@ -1519,6 +1520,9 @@ const normSol = r => ({id:r.id,turnoId:r.turno_id,profesional:r.profesional,paci
 function fmt(d){return d.toISOString().split('T')[0];}
 function initials(n){return n.split(' ').filter(Boolean).map(w=>w[0]).join('').substring(0,2).toUpperCase();}
 function fmtDate(s){const[y,m,d]=s.split('-');const mm=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];return `${parseInt(d)} ${mm[parseInt(m)-1]} ${y}`;}
+function fmtMoney(n){return Number(n).toLocaleString('es-AR',{minimumFractionDigits:0,maximumFractionDigits:2});}
+function fmtFechaLarga(s){const[y,m,d]=s.split('-');const mm=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];return `${parseInt(d)} ${mm[parseInt(m)-1]}, ${y}`;}
+function apellidoPro(nombre){const n=(nombre||'').trim();const titleMatch=n.match(/^(Lic\.|Dr\.|Dra\.|Prof\.)\s*/i);const title=titleMatch?titleMatch[1]:'Lic.';const clean=n.replace(/^(Lic\.|Dr\.|Dra\.|Prof\.)\s*/i,'').trim();const parts=clean.split(' ');return parts.length>1?title+' '+parts[parts.length-1]:nombre;}
 function stLabel(e){return{confirmado:'Confirmado',pendiente:'Pendiente',pendiente_confirmar:'Pend. confirmar',reprogramado:'Reprogramado',cancelado:'Cancelado'}[e]||e;}
 function stClass(e){return{confirmado:'b-conf',pendiente:'b-pend',pendiente_confirmar:'b-pconf',reprogramado:'b-repr',cancelado:'b-canc'}[e]||'';}
 function stWC(e){return{pendiente:'ep',pendiente_confirmar:'ep',cancelado:'ec',reprogramado:'er'}[e]||'';}
@@ -1545,6 +1549,7 @@ async function uploadAvatar(file,id,type){
   return db.storage.from('avatars').getPublicUrl(path).data.publicUrl;
 }
 function calcEdad(fn){if(!fn)return null;const b=new Date(fn),n=new Date();let a=n.getFullYear()-b.getFullYear();if(n.getMonth()<b.getMonth()||(n.getMonth()===b.getMonth()&&n.getDate()<b.getDate()))a--;return a;}
+function esCumple(fn){if(!fn)return false;const b=new Date(fn+'T12:00:00'),n=new Date();return b.getMonth()===n.getMonth()&&b.getDate()===n.getDate();}
 function toast(msg,err=false){const t=document.getElementById('toast');t.textContent=msg;t.style.borderLeftColor=err?'#E24B4A':'var(--primary)';t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800);}
 function setBusy(btnId,busy){const b=document.getElementById(btnId);if(b){b.disabled=busy;b.style.opacity=busy?.6:1;}}
 
@@ -1706,7 +1711,7 @@ async function onLogin(user){
     if(centrosNavItem)showPage('centros',centrosNavItem);
     setTimeout(checkRecordatorios,3000);
   }
-  else{updateNovedadesBadge();updateMensajesBadge();setTimeout(checkOnboarding,500);}
+  else{updateNovedadesBadge();updateMensajesBadge();setTimeout(checkOnboarding,500);if(isCentro)setTimeout(checkRecordatorios,3000);}
 }
 
 function applyRoleUI(){
@@ -1860,7 +1865,7 @@ function renderResumenHoy(){
         <div style="font-size:11.5px;color:var(--text-secondary)">${t.profesional}</div>
       </div>
       <span class="badge ${stClass(t.estado)}" style="flex-shrink:0">${stLabel(t.estado)}</span>
-      <div style="font-size:12.5px;font-weight:700;color:var(--primary-dark);flex-shrink:0">$${t.importe.toLocaleString('es-AR')}</div>
+      <div style="font-size:12.5px;font-weight:700;color:var(--primary-dark);flex-shrink:0">$${fmtMoney(t.importe)}</div>
       ${isAdmin||isCentro?`<button class="act-btn" onclick="event.stopPropagation();openTurnoModal('${t.id}')">✏️</button>`:''}
     </div>`).join('');
 }
@@ -1947,7 +1952,7 @@ function renderProximos(){
     <div class="tc"><div class="tc-top"><span class="badge ${stClass(t.estado)}">${stLabel(t.estado)}</span><span class="tc-date">${fmtDate(t.fecha)} · ${t.hora}</span></div>
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">${avDiv(t.paciente,32,10)}
     <div><div class="tc-name">${t.paciente}</div><div class="tc-prof">${t.profesional}</div></div></div>
-    <div class="tc-meta"><span>💰</span><span class="tc-imp">$${t.importe.toLocaleString('es-AR')}</span>${t.notas?`<span>📝 ${t.notas}</span>`:''}</div>
+    <div class="tc-meta"><span>💰</span><span class="tc-imp">$${fmtMoney(t.importe)}</span>${t.notas?`<span>📝 ${t.notas}</span>`:''}</div>
     <button class="tc-btn" style="margin-top:10px" onclick="${btnAct(t)}">${btnLabel}</button></div>`).join('')
     :'<div class="empty" style="grid-column:1/-1"><div class="empty-ico">📅</div><div class="empty-txt">No hay próximos turnos</div></div>';
 }
@@ -1976,7 +1981,7 @@ function openDayModal(s){
           <div style="font-size:11.5px;color:var(--text-secondary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${t.profesional}</div>
         </div>
         <span class="badge ${stClass(t.estado)}">${stLabel(t.estado)}</span>
-        <div style="font-size:12.5px;font-weight:700;color:var(--primary-dark);flex-shrink:0">$${t.importe.toLocaleString('es-AR')}</div>
+        <div style="font-size:12.5px;font-weight:700;color:var(--primary-dark);flex-shrink:0">$${fmtMoney(t.importe)}</div>
         <button class="act-btn" title="Editar" onclick="closeDayModal();openTurnoModal('${t.id}')">✏️</button>
       </div>`).join('')
     :`<div class="empty" style="padding:28px 0"><div class="empty-ico">📅</div><div class="empty-txt">No hay turnos para este día</div></div>`;
@@ -2045,7 +2050,7 @@ function renderTable(){
   document.getElementById('tblBody').innerHTML=fl.length?fl.map(t=>`
     <tr><td><div class="td-pat">${avDiv(t.paciente,27,9)}${t.paciente}</div></td>
     <td>${t.profesional}</td><td>${fmtDate(t.fecha)}</td><td>${t.hora}</td>
-    <td class="td-imp">$${t.importe.toLocaleString('es-AR')}</td>
+    <td class="td-imp">$${fmtMoney(t.importe)}</td>
     <td><span class="badge ${stClass(t.estado)}">${stLabel(t.estado)}</span></td>
     <td>${acciones(t)}</td></tr>`).join('')
     :'<tr><td colspan="7" style="text-align:center;padding:30px;color:var(--text-muted)">No se encontraron turnos</td></tr>';
@@ -2199,17 +2204,19 @@ function renderPacientes(){
     const tsConf=ts.filter(t=>t.estado==='confirmado');
     const total=tsConf.reduce((s,t)=>s+t.importe,0);
     const edad=calcEdad(p.fechaNac);const pal=avPal(p.nombre);
-    return `<div class="pcard" onclick="openDrawer('pac','${p.id}')">
+    const cumple=esCumple(p.fechaNac);
+    return `<div class="pcard" onclick="openDrawer('pac','${p.id}')" style="${cumple?'border:2px solid #FBBF24;background:linear-gradient(135deg,#FFFBEB,#fff 40%)':''}">
+      ${cumple?'<div style="position:absolute;top:6px;right:8px;font-size:18px" title="¡Hoy cumple años!">🎈</div>':''}
       <div class="pcard-top">
-        <div class="pcard-av" style="background:${pal.bg};color:${pal.tx}">${initials(p.nombre)}</div>
-        <div><div class="pcard-name">${p.nombre}</div>
-        <div class="pcard-sub">${edad?edad+' años · ':''} ${p.obraSocial||'Particular'}</div></div>
+        <div class="pcard-av" style="background:${cumple?'#FBBF24':pal.bg};color:${cumple?'#fff':pal.tx}">${cumple?'🎂':initials(p.nombre)}</div>
+        <div><div class="pcard-name">${p.nombre}${cumple?' 🎉':''}</div>
+        <div class="pcard-sub">${cumple?'<span style="color:#B45309;font-weight:600">¡Cumple '+edad+' años hoy!</span>':((edad?edad+' años · ':'')+' '+(p.obraSocial||'Particular'))}</div></div>
       </div>
       <hr class="pcard-divider">
       <div class="pcard-meta">
         <div class="pcard-stat"><div class="pcard-stat-val">${ts.length}</div><div class="pcard-stat-lbl">Turnos</div></div>
         <div class="pcard-stat"><div class="pcard-stat-val">${tsConf.length}</div><div class="pcard-stat-lbl">Asistidos</div></div>
-        <div class="pcard-stat"><div class="pcard-stat-val" style="font-size:13px">$${total>0?Math.round(total/1000)+'k':'—'}</div><div class="pcard-stat-lbl">Total</div></div>
+        <div class="pcard-stat"><div class="pcard-stat-val" style="font-size:13px">$${total>0?fmtMoney(total):'—'}</div><div class="pcard-stat-lbl">Total</div></div>
       </div></div>`;
   }).join('');
 }
@@ -2308,7 +2315,7 @@ function renderProfesionales(){
       </div>
       <div style="margin-bottom:12px;display:flex;gap:6px;flex-wrap:wrap">
         <span class="spec-badge">${p.especialidad}</span>
-        <span style="display:inline-flex;padding:3px 9px;border-radius:20px;font-size:10.5px;font-weight:600;background:#F0FAF7;color:#0F6E56">$${p.tarifa.toLocaleString('es-AR')}/ses.</span>
+        <span style="display:inline-flex;padding:3px 9px;border-radius:20px;font-size:10.5px;font-weight:600;background:#F0FAF7;color:#0F6E56">$${fmtMoney(p.tarifa)}/ses.</span>
       </div>
       <hr class="pcard-divider">
       <div class="pcard-meta">
@@ -2407,11 +2414,20 @@ function buildPacienteDrawer(id){
   const conf=ts.filter(t=>t.estado==='confirmado');
   const total=conf.reduce((s,t)=>s+t.importe,0);
   const edad=calcEdad(p.fechaNac);const pal=avPal(p.nombre);
+  const cumple=esCumple(p.fechaNac);
   return `
+    ${cumple?`<div style="background:linear-gradient(135deg,#FEF3C7,#FBBF24,#FEF3C7);padding:14px 18px;text-align:center;position:relative;overflow:hidden">
+      <div style="font-size:32px;margin-bottom:4px">🎈🎂🎈</div>
+      <div style="font-size:15px;font-weight:700;color:#92400E">¡Hoy es el cumpleaños de ${p.nombre}!</div>
+      <div style="font-size:12px;color:#B45309;margin-top:2px">Cumple ${edad||''} años 🎉</div>
+      <div style="position:absolute;top:-5px;left:10px;font-size:28px;opacity:.3;animation:floatBalloon 3s ease-in-out infinite">🎈</div>
+      <div style="position:absolute;top:-8px;right:15px;font-size:24px;opacity:.25;animation:floatBalloon 2.5s ease-in-out infinite .5s">🎈</div>
+      <div style="position:absolute;top:2px;right:45%;font-size:20px;opacity:.2;animation:floatBalloon 3.5s ease-in-out infinite 1s">🎈</div>
+    </div>`:''}
     <div class="dw-hdr">
-      <div class="dw-av" style="background:${pal.bg};color:${pal.tx}">${initials(p.nombre)}</div>
-      <div class="dw-info"><div class="dw-name">${p.nombre}</div>
-        <div class="dw-sub">${edad?`<span>🎂 ${edad} años</span>`:''}${p.obraSocial?`<span>🏥 ${p.obraSocial}</span>`:''}${ts[0]?`<span>📅 Último: ${fmtDate(ts[0].fecha)}</span>`:''}</div>
+      <div class="dw-av" style="background:${pal.bg};color:${pal.tx}">${cumple?'🎂':initials(p.nombre)}</div>
+      <div class="dw-info"><div class="dw-name">${p.nombre}${cumple?' 🎈':''}</div>
+        <div class="dw-sub">${edad?`<span>${cumple?'🎉':'🎂'} ${edad} años${cumple?' — ¡Feliz cumpleaños!':''}</span>`:''}${p.obraSocial?`<span>🏥 ${p.obraSocial}</span>`:''}${ts[0]?`<span>📅 Último: ${fmtDate(ts[0].fecha)}</span>`:''}</div>
       </div>
       <button class="dw-close" onclick="closeDrawer()">×</button>
     </div>
@@ -2427,7 +2443,7 @@ function buildPacienteDrawer(id){
         <div class="stats-row">
           <div class="stat-box"><div class="stat-num">${ts.length}</div><div class="stat-lbl">Turnos totales</div></div>
           <div class="stat-box"><div class="stat-num">${conf.length}</div><div class="stat-lbl">Confirmados</div></div>
-          <div class="stat-box"><div class="stat-num" style="font-size:15px">$${total>0?total.toLocaleString('es-AR'):'0'}</div><div class="stat-lbl">Total invertido</div></div>
+          <div class="stat-box"><div class="stat-num" style="font-size:15px">$${total>0?fmtMoney(total):'0'}</div><div class="stat-lbl">Total invertido</div></div>
         </div>
       </div>
       <div class="dw-sec"><div class="dw-sec-title">Datos del paciente</div>
@@ -2444,7 +2460,7 @@ function buildPacienteDrawer(id){
         <div class="dw-tbl tbl-wrap"><table><thead><tr><th>Fecha</th><th>Hora</th><th>Profesional</th><th>Estado</th><th>Importe</th></tr></thead>
         <tbody>${ts.slice(0,8).map(t=>`<tr><td>${fmtDate(t.fecha)}</td><td>${t.hora}</td><td>${t.profesional.split(' ').slice(-1)[0]}</td>
           <td><span class="badge ${stClass(t.estado)}" style="font-size:9.5px">${stLabel(t.estado)}</span></td>
-          <td style="font-weight:600;color:var(--primary-dark)">$${t.importe.toLocaleString('es-AR')}</td></tr>`).join('')}
+          <td style="font-weight:600;color:var(--primary-dark)">$${fmtMoney(t.importe)}</td></tr>`).join('')}
         </tbody></table></div>
         ${ts.length>8?`<div style="text-align:center;padding:8px;font-size:12px;color:var(--text-muted)">${ts.length-8} turnos más</div>`:''}
       </div>`:''}
@@ -2485,7 +2501,7 @@ function buildProfesionalDrawer(id){
         <div class="info-grid">
           <div class="info-item"><div class="info-label">Teléfono</div><div class="info-val">${p.tel||'—'}</div></div>
           <div class="info-item"><div class="info-label">Email</div><div class="info-val">${p.email||'—'}</div></div>
-          <div class="info-item"><div class="info-label">Tarifa por sesión</div><div class="info-val">$${p.tarifa.toLocaleString('es-AR')}</div></div>
+          <div class="info-item"><div class="info-label">Tarifa por sesión</div><div class="info-val">$${fmtMoney(p.tarifa)}</div></div>
           <div class="info-item"><div class="info-label">Matrícula</div><div class="info-val">${p.matricula||'—'}</div></div>
           <div class="info-item full"><div class="info-label">Disponibilidad</div><div class="info-val">${p.disponibilidad||'—'}</div></div>
           ${p.notas?`<div class="info-item full"><div class="info-label">Notas</div><div class="info-val">${p.notas}</div></div>`:''}
@@ -2495,7 +2511,7 @@ function buildProfesionalDrawer(id){
         <div class="dw-tbl tbl-wrap"><table><thead><tr><th>Fecha</th><th>Hora</th><th>Paciente</th><th>Estado</th><th>Importe</th></tr></thead>
         <tbody>${prox.map(t=>`<tr><td>${fmtDate(t.fecha)}</td><td>${t.hora}</td><td>${t.paciente}</td>
           <td><span class="badge ${stClass(t.estado)}" style="font-size:9.5px">${stLabel(t.estado)}</span></td>
-          <td style="font-weight:600;color:var(--primary-dark)">$${t.importe.toLocaleString('es-AR')}</td></tr>`).join('')}
+          <td style="font-weight:600;color:var(--primary-dark)">$${fmtMoney(t.importe)}</td></tr>`).join('')}
         </tbody></table></div>
       </div>`:`<div style="text-align:center;padding:20px;color:var(--text-muted);font-size:13px">Sin próximos turnos asignados</div>`}
     </div>`;
@@ -2509,13 +2525,13 @@ function renderFin(){
   const rows=Object.entries(byProf).sort((a,b)=>b[1]-a[1]).map(([p,v])=>`
     <tr><td><div class="td-pat">${avDiv(p,27,9)}${p}</div></td>
     <td>${comp.filter(t=>t.profesional===p).length}</td>
-    <td class="td-imp">$${v.toLocaleString('es-AR')}</td></tr>`).join('');
+    <td class="td-imp">$${fmtMoney(v)}</td></tr>`).join('');
   document.getElementById('finContent').innerHTML=`
     <div class="kpi-grid" style="margin-bottom:18px">
-      <div class="kpi-card"><div class="kpi-icon" style="background:#D4F4EB">💰</div><div class="kpi-label">Ingresos confirmados</div><div class="kpi-number" style="font-size:22px">$${total.toLocaleString('es-AR')}</div><div class="kpi-note">Turnos en estado Confirmado</div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:#D4F4EB">💰</div><div class="kpi-label">Ingresos confirmados</div><div class="kpi-number" style="font-size:22px">$${fmtMoney(total)}</div><div class="kpi-note">Turnos en estado Confirmado</div></div>
       <div class="kpi-card"><div class="kpi-icon" style="background:#D4F4EB">📊</div><div class="kpi-label">Turnos confirmados</div><div class="kpi-number">${comp.length}</div><div class="kpi-note">Total de turnos activos</div></div>
-      <div class="kpi-card"><div class="kpi-icon" style="background:#FFF3CD">⏳</div><div class="kpi-label">Pendientes de cobro</div><div class="kpi-number" style="font-size:22px">$${TURNOS.filter(t=>t.estado==='pendiente').reduce((s,t)=>s+t.importe,0).toLocaleString('es-AR')}</div><div class="kpi-note">Si se confirman</div></div>
-      <div class="kpi-card"><div class="kpi-icon" style="background:#FFE4E4">✕</div><div class="kpi-label">Perdido (cancelados)</div><div class="kpi-number" style="font-size:22px">$${TURNOS.filter(t=>t.estado==='cancelado').reduce((s,t)=>s+t.importe,0).toLocaleString('es-AR')}</div><div class="kpi-note">Turnos cancelados</div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:#FFF3CD">⏳</div><div class="kpi-label">Pendientes de cobro</div><div class="kpi-number" style="font-size:22px">$${fmtMoney(TURNOS.filter(t=>t.estado==='pendiente').reduce((s,t)=>s+t.importe,0))}</div><div class="kpi-note">Si se confirman</div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:#FFE4E4">✕</div><div class="kpi-label">Perdido (cancelados)</div><div class="kpi-number" style="font-size:22px">$${fmtMoney(TURNOS.filter(t=>t.estado==='cancelado').reduce((s,t)=>s+t.importe,0))}</div><div class="kpi-note">Turnos cancelados</div></div>
     </div>
     <div class="sec-hdr"><div class="sec-title">Ingresos por profesional</div></div>
     <div class="tbl-wrap"><table><thead><tr><th>Profesional</th><th>Turnos</th><th>Total</th></tr></thead><tbody>${rows||'<tr><td colspan="3" style="text-align:center;padding:20px;color:var(--text-muted)">Sin datos aún</td></tr>'}</tbody></table></div>`;
@@ -2564,7 +2580,7 @@ function renderAgenda(){
             ${t.notas?`<div style="font-size:11.5px;color:var(--text-muted)">📝 ${t.notas}</div>`:''}
           </div>
           <span class="badge ${stClass(t.estado)}">${stLabel(t.estado)}</span>
-          <div style="font-size:13px;font-weight:700;color:var(--primary-dark);flex-shrink:0">$${t.importe.toLocaleString('es-AR')}</div>
+          <div style="font-size:13px;font-weight:700;color:var(--primary-dark);flex-shrink:0">$${fmtMoney(t.importe)}</div>
           ${isAdmin
             ?`<button class="act-btn" title="Editar" onclick="openTurnoModal('${t.id}')">✏️</button>
                <button class="act-btn" title="Cambiar estado" onclick="openStModal('${t.id}')">⟳</button>
@@ -2702,7 +2718,7 @@ async function emailProfesional(turno){
     paciente_nombre: turno.paciente,
     fecha: fmtDate(turno.fecha),
     hora: turno.hora,
-    importe: '$'+Number(turno.importe).toLocaleString('es-AR'),
+    importe: '$'+fmtMoney(turno.importe),
     deadline_confirmar: deadline.toLocaleDateString('es-AR',{weekday:'long',day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'}),
     reply_to: 'vincular.soporte@gmail.com',
   });
@@ -2718,7 +2734,7 @@ async function emailPacienteConfirmacion(turno){
     profesional_nombre: turno.profesional,
     fecha: fmtDate(turno.fecha),
     hora: turno.hora,
-    importe: '$'+Number(turno.importe).toLocaleString('es-AR'),
+    importe: '$'+fmtMoney(turno.importe),
     reply_to: 'vincular.soporte@gmail.com',
   });
   if(ok){
@@ -2749,21 +2765,45 @@ async function emailRecordatorio(turno){
 
 // Chequeo automático de recordatorios 48hs (corre al iniciar sesión como admin)
 async function checkRecordatorios(){
-  if(!emailJsReady())return;
   const ahora=new Date();
   const en48=new Date(ahora.getTime()+48*60*60*1000);
   const candidatos=TURNOS.filter(t=>{
     if(t.estado!=='confirmado')return false;
-    if(!t.pacienteNotificado)return false;
     if(t.recordatorioEnviado)return false;
     const ft=new Date(t.fecha+'T'+t.hora.replace('hs','').replace('h','').trim().padStart(5,'0')+':00');
     return ft>ahora&&ft<=en48;
   });
-  for(const t of candidatos){
-    await emailRecordatorio(t);
-    console.log('Recordatorio enviado a',t.paciente,'para',t.fecha,t.hora);
-  }
-  if(candidatos.length)toast(`📧 ${candidatos.length} recordatorio${candidatos.length>1?'s':''} enviado${candidatos.length>1?'s':''}`);
+  if(!candidatos.length)return;
+  // Mostrar banner con botones de WhatsApp para cada paciente
+  const banner=document.createElement('div');
+  banner.id='recordatorioBanner';
+  banner.style.cssText='position:fixed;top:0;left:0;right:0;z-index:9999;background:linear-gradient(135deg,#0F766E,#115E59);color:#fff;padding:16px 24px;display:flex;flex-direction:column;gap:10px;box-shadow:0 4px 20px rgba(0,0,0,.2);animation:slideDown .3s ease';
+  banner.innerHTML=`
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <div style="font-size:14px;font-weight:700">📱 ${candidatos.length} turno${candidatos.length>1?'s':''}  próximo${candidatos.length>1?'s':''} (48hs) — Enviar recordatorio por WhatsApp</div>
+      <button onclick="this.closest('#recordatorioBanner').remove()" style="background:none;border:none;color:#fff;font-size:20px;cursor:pointer;padding:0 4px">✕</button>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px">
+      ${candidatos.map(t=>{
+        const pac=PACIENTES.find(p=>p.nombre===t.paciente);
+        const tel=(pac?.tel||'').replace(/\D/g,'');
+        const numero=tel?(tel.startsWith('54')?tel:'54'+tel):'';
+        const msg=`Hola, ${t.paciente}!\nTe recordamos tu próximo turno programado:\nEl día ${fmtFechaLarga(t.fecha)}, ${t.hora}hs.\nCon: ${apellidoPro(t.profesional)}\n\n¡Te esperamos!`;
+        if(!numero)return `<span style="font-size:12px;padding:6px 12px;background:rgba(255,255,255,.15);border-radius:6px">⚠️ ${t.paciente} (sin teléfono)</span>`;
+        return `<a href="https://wa.me/${numero}?text=${encodeURIComponent(msg)}" target="_blank" onclick="marcarRecordatorio('${t.id}')" style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:#25D366;color:#fff;border-radius:8px;font-size:12.5px;font-weight:600;text-decoration:none;transition:opacity .15s" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">📱 ${t.paciente} · ${fmtDate(t.fecha)} ${t.hora}</a>`;
+      }).join('')}
+    </div>
+    <div style="font-size:11px;opacity:.7">Hacé clic en cada paciente para enviar el recordatorio por WhatsApp. Después se marca como enviado.</div>
+  `;
+  document.body.appendChild(banner);
+}
+async function marcarRecordatorio(turnoId){
+  try{
+    await db.from('turnos').update({recordatorio_enviado:true}).eq('id',turnoId);
+    const t=TURNOS.find(x=>x.id===turnoId);
+    if(t)t.recordatorioEnviado=true;
+    toast('✓ Recordatorio marcado como enviado');
+  }catch(e){console.warn(e);}
 }
 
 // ─── WHATSAPP (anchor trick — evita popup blocker) ───────────────────────────
@@ -2778,7 +2818,7 @@ function abrirWhatsappAviso(profesionalNombre,paciente,fecha,hora,estado){
   const pro=PROFESIONALES.find(p=>p.nombre===profesionalNombre);
   const tel=(pro?.tel||'').replace(/\D/g,'');
   const numero=tel?( tel.startsWith('54')?tel:'54'+tel ) : WA_DEFAULT_NUMBER;
-  const msg=`Hola ${profesionalNombre}! 👋 Te avisamos desde *Vincular*:\n\nTenés un turno asignado:\n👤 Paciente: *${paciente}*\n📅 Fecha: ${fmtDate(fecha)} a las ${hora}hs\n📋 Estado: *${stLabel(estado)}*\n\n⏰ Tenés 24hs para confirmarlo en la plataforma. Cualquier consulta respondé este mensaje.`;
+  const msg=`Hola, ${profesionalNombre}!\nTe avisamos que tenés un turno asignado:\nPaciente: ${paciente}\nEl día ${fmtFechaLarga(fecha)}, ${hora}hs.\nEstado: ${stLabel(estado)}\n\nTenés 24hs para confirmarlo en la plataforma.`;
   abrirWhatsapp(numero,msg);
 }
 function abrirEmailAviso(profesionalNombre,paciente,fecha,hora,estado){
@@ -2853,11 +2893,7 @@ function _pacWA(){
   const pac=PACIENTES.find(p=>p.nombre===t.paciente);
   const tel=(pac?.tel||'').replace(/\D/g,'');
   const numero=tel?(tel.startsWith('54')?tel:'54'+tel):WA_DEFAULT_NUMBER;
-  const msg='Hola '+t.paciente+'! 👋 Te confirmamos tu turno desde *Vincular*:\n\n'
-    +'👩‍⚕️ Profesional: *'+t.profesional+'*\n'
-    +'📅 Fecha: *'+fmtDate(t.fecha)+' a las '+t.hora+'hs*\n'
-    +'💰 Importe: $'+Number(t.importe).toLocaleString('es-AR')+'\n\n'
-    +'Ante cualquier consulta respondé este mensaje.';
+  const msg='Hola, '+t.paciente+'!\nTe confirmamos tu próximo turno:\nEl día '+fmtFechaLarga(t.fecha)+', '+t.hora+'hs.\nCon: '+apellidoPro(t.profesional)+'\nImporte: $'+fmtMoney(t.importe)+'\n\nAnte cualquier consulta respondé este mensaje.';
   abrirWhatsapp(numero,msg);
   closeAvisoPacModal();
 }
@@ -2868,11 +2904,7 @@ async function _pacAmbos(){
   const pac=PACIENTES.find(p=>p.nombre===t.paciente);
   const tel=(pac?.tel||'').replace(/\D/g,'');
   const numero=tel?(tel.startsWith('54')?tel:'54'+tel):WA_DEFAULT_NUMBER;
-  const msg='Hola '+t.paciente+'! 👋 Te confirmamos tu turno desde *Vincular*:\n\n'
-    +'👩‍⚕️ Profesional: *'+t.profesional+'*\n'
-    +'📅 Fecha: *'+fmtDate(t.fecha)+' a las '+t.hora+'hs*\n'
-    +'💰 Importe: $'+Number(t.importe).toLocaleString('es-AR')+'\n\n'
-    +'Ante cualquier consulta respondé este mensaje.';
+  const msg='Hola, '+t.paciente+'!\nTe confirmamos tu próximo turno:\nEl día '+fmtFechaLarga(t.fecha)+', '+t.hora+'hs.\nCon: '+apellidoPro(t.profesional)+'\nImporte: $'+fmtMoney(t.importe)+'\n\nAnte cualquier consulta respondé este mensaje.';
   abrirWhatsapp(numero,msg);
   closeAvisoPacModal();
 }
@@ -3191,7 +3223,7 @@ async function renderRendimiento(){
       <div class="kpi-card"><div class="kpi-icon" style="background:#D4F4EB">🏢</div><div class="kpi-label">Sedes activas</div><div class="kpi-number">${SEDES.filter(s=>s.activa&&s.alias!=='ADMIN').length}</div></div>
       <div class="kpi-card"><div class="kpi-icon" style="background:#D4F4EB">👥</div><div class="kpi-label">Pacientes totales</div><div class="kpi-number">${PACIENTES.length}</div></div>
       <div class="kpi-card"><div class="kpi-icon" style="background:#D4F4EB">📅</div><div class="kpi-label">Turnos del período</div><div class="kpi-number">${turnosMes.length}</div></div>
-      <div class="kpi-card"><div class="kpi-icon" style="background:#D4F4EB">💰</div><div class="kpi-label">Ingresos del período</div><div class="kpi-number" style="font-size:20px">$${totalIngresos.toLocaleString('es-AR')}</div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:#D4F4EB">💰</div><div class="kpi-label">Ingresos del período</div><div class="kpi-number" style="font-size:20px">$${fmtMoney(totalIngresos)}</div></div>
     </div>
 
     <!-- Por sede — colapsable -->
@@ -3205,7 +3237,7 @@ async function renderRendimiento(){
           </div>
           <div style="display:flex;gap:16px;font-size:12.5px">
             <span style="color:var(--text-secondary)">${turnos} turnos</span>
-            <span style="font-weight:700;color:var(--primary-dark)">$${ingresos.toLocaleString('es-AR')}</span>
+            <span style="font-weight:700;color:var(--primary-dark)">$${fmtMoney(ingresos)}</span>
             <span style="color:var(--text-muted)">▼</span>
           </div>
         </div>
@@ -3213,7 +3245,7 @@ async function renderRendimiento(){
           <div style="text-align:center"><div style="font-size:20px;font-weight:700;color:var(--primary-dark)">${pacientes}</div><div style="font-size:10px;color:var(--text-muted)">Pacientes</div></div>
           <div style="text-align:center"><div style="font-size:20px;font-weight:700;color:var(--primary-dark)">${profesionales}</div><div style="font-size:10px;color:var(--text-muted)">Profesionales</div></div>
           <div style="text-align:center"><div style="font-size:20px;font-weight:700;color:var(--primary-dark)">${confirmados}</div><div style="font-size:10px;color:var(--text-muted)">Confirmados</div></div>
-          <div style="text-align:center"><div style="font-size:20px;font-weight:700;color:var(--primary-dark)">$${ingresos.toLocaleString('es-AR')}</div><div style="font-size:10px;color:var(--text-muted)">Ingresos</div></div>
+          <div style="text-align:center"><div style="font-size:20px;font-weight:700;color:var(--primary-dark)">$${fmtMoney(ingresos)}</div><div style="font-size:10px;color:var(--text-muted)">Ingresos</div></div>
         </div>
         <div style="margin-top:10px;background:#F3F4F6;border-radius:4px;height:6px">
           <div style="width:${pctBar}%;height:100%;background:var(--primary);border-radius:4px;transition:width .4s"></div>
@@ -3854,9 +3886,9 @@ function renderIngresos(){
 
   document.getElementById('ingresosContent').innerHTML=`
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:18px">
-      <div class="kpi"><div class="kpi-lbl">Cobrado en período</div><div class="kpi-val" style="color:#0D9488">$${ingresoCobrado.toLocaleString('es-AR')}</div><div style="font-size:11px;color:var(--text-muted);margin-top:2px">${cantPagos} pago${cantPagos===1?'':'s'}</div></div>
-      <div class="kpi"><div class="kpi-lbl">Ingreso mensual recurrente</div><div class="kpi-val">$${ingresoEsperado.toLocaleString('es-AR')}</div><div style="font-size:11px;color:var(--text-muted);margin-top:2px">Centros activos</div></div>
-      <div class="kpi"><div class="kpi-lbl">Promedio por centro</div><div class="kpi-val">$${cs.length?Math.round(ingresoEsperado/cs.filter(s=>s.plan_estado==='activo').length||0).toLocaleString('es-AR'):0}</div></div>
+      <div class="kpi"><div class="kpi-lbl">Cobrado en período</div><div class="kpi-val" style="color:#0D9488">$${fmtMoney(ingresoCobrado)}</div><div style="font-size:11px;color:var(--text-muted);margin-top:2px">${cantPagos} pago${cantPagos===1?'':'s'}</div></div>
+      <div class="kpi"><div class="kpi-lbl">Ingreso mensual recurrente</div><div class="kpi-val">$${fmtMoney(ingresoEsperado)}</div><div style="font-size:11px;color:var(--text-muted);margin-top:2px">Centros activos</div></div>
+      <div class="kpi"><div class="kpi-lbl">Promedio por centro</div><div class="kpi-val">$${cs.length?fmtMoney(Math.round(ingresoEsperado/cs.filter(s=>s.plan_estado==='activo').length||0)):0}</div></div>
       <div class="kpi"><div class="kpi-lbl">Centros activos</div><div class="kpi-val">${cs.filter(s=>s.plan_estado==='activo').length}</div></div>
     </div>
 
@@ -3869,7 +3901,7 @@ function renderIngresos(){
             const h=m.total>0?Math.max(8,(m.total/maxBar)*160):4;
             return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;position:relative">
               <div style="font-size:10px;color:var(--text-secondary);font-weight:600;margin-bottom:4px;${m.total===0?'opacity:.3':''}">${m.total>0?'$'+(m.total>=1000?Math.round(m.total/1000)+'k':m.total):''}</div>
-              <div style="width:100%;height:${h}px;background:linear-gradient(180deg,var(--primary),var(--primary-light));border-radius:4px 4px 0 0;transition:all .25s" title="$${m.total.toLocaleString('es-AR')}"></div>
+              <div style="width:100%;height:${h}px;background:linear-gradient(180deg,var(--primary),var(--primary-light));border-radius:4px 4px 0 0;transition:all .25s" title="$${m.fmtMoney(total)}"></div>
               <div style="font-size:10px;color:var(--text-muted);margin-top:4px;position:absolute;bottom:-20px;left:0;right:0;text-align:center">${m.label}</div>
             </div>`;
           }).join('')}
@@ -3885,7 +3917,7 @@ function renderIngresos(){
           return `<div style="margin-bottom:12px">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
               <span style="font-size:12.5px;font-weight:600;color:${pi.color}">${pi.label}</span>
-              <span style="font-size:11.5px;color:var(--text-muted)">${d.count} · $${d.monto.toLocaleString('es-AR')}</span>
+              <span style="font-size:11.5px;color:var(--text-muted)">${d.count} · $${fmtMoney(d.monto)}</span>
             </div>
             <div style="height:6px;background:var(--bg-page);border-radius:20px;overflow:hidden"><div style="height:100%;width:${pct}%;background:${pi.color};border-radius:20px"></div></div>
           </div>`;
@@ -3902,7 +3934,7 @@ function renderIngresos(){
           <div style="font-size:13px;font-weight:700;color:var(--text-muted)">#${i+1}</div>
           <div style="font-size:13px;font-weight:600;color:var(--text-primary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${c.nombre}</div>
           <div><span style="background:${pi.color}20;color:${pi.color};font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px">${pi.label}</span></div>
-          <div style="text-align:right;font-size:13.5px;font-weight:700;color:#0D9488">$${c.total.toLocaleString('es-AR')}</div>
+          <div style="text-align:right;font-size:13.5px;font-weight:700;color:#0D9488">$${c.fmtMoney(total)}</div>
         </div>`;
       }).join('')}
     </div>
@@ -3971,9 +4003,9 @@ function renderPagos(){
   const totalVencido=items.filter(i=>i.estado==='vencido').reduce((s,i)=>s+i.precio,0);
   const cantVencidos=items.filter(i=>i.estado==='vencido').length;
   document.getElementById('pagosKPIs').innerHTML=`
-    <div class="kpi"><div class="kpi-lbl">Cobrado total</div><div class="kpi-val" style="color:#0D9488">$${totalCobrado.toLocaleString('es-AR')}</div></div>
-    <div class="kpi"><div class="kpi-lbl">Pendientes</div><div class="kpi-val" style="color:#F59E0B">$${totalPendiente.toLocaleString('es-AR')}</div></div>
-    <div class="kpi"><div class="kpi-lbl">Vencidos</div><div class="kpi-val" style="color:#B91C1C">$${totalVencido.toLocaleString('es-AR')}</div><div style="font-size:11px;color:var(--text-muted);margin-top:2px">${cantVencidos} pago${cantVencidos===1?'':'s'}</div></div>
+    <div class="kpi"><div class="kpi-lbl">Cobrado total</div><div class="kpi-val" style="color:#0D9488">$${fmtMoney(totalCobrado)}</div></div>
+    <div class="kpi"><div class="kpi-lbl">Pendientes</div><div class="kpi-val" style="color:#F59E0B">$${fmtMoney(totalPendiente)}</div></div>
+    <div class="kpi"><div class="kpi-lbl">Vencidos</div><div class="kpi-val" style="color:#B91C1C">$${fmtMoney(totalVencido)}</div><div style="font-size:11px;color:var(--text-muted);margin-top:2px">${cantVencidos} pago${cantVencidos===1?'':'s'}</div></div>
     <div class="kpi"><div class="kpi-lbl">Tasa de cobro</div><div class="kpi-val">${items.length?Math.round((items.filter(i=>i.estado==='pagado').length/items.length)*100):0}%</div></div>
   `;
   // Badge sidebar
@@ -4004,7 +4036,7 @@ function renderPagos(){
             <div style="min-width:0;flex:1"><div style="font-weight:600;color:var(--text-primary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${i.sede_nombre}</div><div style="font-size:11px;color:var(--text-muted)">Plan ${pi.label}</div></div>
           </div>
           <div style="font-size:12.5px;color:var(--text-secondary)">${MN[i.mes-1]} ${i.anio}</div>
-          <div style="font-weight:700;color:var(--text-primary)">$${monto.toLocaleString('es-AR')}</div>
+          <div style="font-weight:700;color:var(--text-primary)">$${fmtMoney(monto)}</div>
           <div style="font-size:12.5px;color:var(--text-secondary)">${fechaPago}</div>
           <div><span style="background:${c}20;color:${c};font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;text-transform:uppercase;letter-spacing:.04em">${lbl}</span></div>
           <div style="text-align:right">
@@ -4100,7 +4132,7 @@ function renderCentros(){
     <div class="kpi"><div class="kpi-lbl">Total centros</div><div class="kpi-val">${total}</div></div>
     <div class="kpi"><div class="kpi-lbl">Activos</div><div class="kpi-val" style="color:#0D9488">${activos}</div></div>
     <div class="kpi"><div class="kpi-lbl">En prueba</div><div class="kpi-val" style="color:#F59E0B">${enPrueba}</div></div>
-    <div class="kpi"><div class="kpi-lbl">Ingreso mensual</div><div class="kpi-val">$${ingresoMensual.toLocaleString('es-AR')}</div></div>
+    <div class="kpi"><div class="kpi-lbl">Ingreso mensual</div><div class="kpi-val">$${fmtMoney(ingresoMensual)}</div></div>
   `;
 
   // Filtros aplicados
@@ -4214,7 +4246,7 @@ function openCentroDetail(id){
       ${cdRow('Horario',s.horario_inicio&&s.horario_fin?(s.horario_inicio+' a '+s.horario_fin):'—','🕐')}
       ${cdRow('Alta',fInicio,'📅')}
       ${cdRow('Vencimiento',fFin+(dr!==null?' · '+dr+' día'+(dr===1?'':'s'):''),'⏰')}
-      ${cdRow('Precio',pInfo.precio===0?'Sin costo':'$'+pInfo.precio.toLocaleString('es-AR')+' / mes','💰')}
+      ${cdRow('Precio',pInfo.precio===0?'Sin costo':'$'+fmtMoney(pInfo.precio)+' / mes','💰')}
     </div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;padding-top:14px;border-top:1px solid var(--border)">
       ${s.email?`<a href="mailto:${s.email}" class="btn btn-outline btn-sm" style="text-decoration:none">✉️ Email</a>`:''}
@@ -4362,7 +4394,7 @@ function renderMembresia(){
           <span style="background:${estadoColor}20;color:${estadoColor};font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;text-transform:uppercase;letter-spacing:.05em">${estadoLabel}</span>
         </div>
         <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:34px;font-weight:800;color:${pInfo.color};letter-spacing:-.02em;margin-bottom:4px">${pInfo.label}</div>
-        <div style="font-size:15px;color:var(--text-secondary);margin-bottom:20px">${pInfo.precio===0?'Sin costo':'$'+pInfo.precio.toLocaleString('es-AR')+' / mes'}</div>
+        <div style="font-size:15px;color:var(--text-secondary);margin-bottom:20px">${pInfo.precio===0?'Sin costo':'$'+fmtMoney(pInfo.precio)+' / mes'}</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:14px;background:#ffffff80;border-radius:10px;border:1px solid var(--border)">
           <div>
             <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;font-weight:600">Profesionales</div>
@@ -4405,7 +4437,7 @@ function renderMembresia(){
           return `<div style="background:#fff;border-radius:10px;border:1px solid var(--border);padding:16px;transition:box-shadow .2s" onmouseover="this.style.boxShadow='0 4px 14px rgba(0,0,0,.06)'" onmouseout="this.style.boxShadow=''">
             <div style="font-size:11px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.05em">Plan</div>
             <div style="font-size:18px;font-weight:700;color:${pi.color};margin:2px 0 6px">${pi.label}</div>
-            <div style="font-size:16px;font-weight:700;color:var(--text-primary)">$${pi.precio.toLocaleString('es-AR')}<span style="font-size:11px;color:var(--text-muted);font-weight:500"> /mes</span></div>
+            <div style="font-size:16px;font-weight:700;color:var(--text-primary)">$${fmtMoney(pi.precio)}<span style="font-size:11px;color:var(--text-muted);font-weight:500"> /mes</span></div>
             <div style="font-size:11.5px;color:var(--text-secondary);margin-top:8px;line-height:1.5">${pi.maxProf===null?'Profesionales ilimitados':'Hasta '+pi.maxProf+' profesional'+(pi.maxProf===1?'':'es')}<br>Pacientes ilimitados</div>
           </div>`;
         }).join('')}
@@ -4643,3 +4675,4 @@ init();
 </script>
 </body>
 </html>
+
