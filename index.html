@@ -299,7 +299,39 @@ tbody tr:hover td{background:#F8FDFB;}
 .empty-txt{font-size:13.5px;}
 ::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--primary-light);border-radius:10px;}
 
-/* ═══ NUEVAS FUNCIONES ═══════════════════════════════════════════════════ */
+/* ═══ NUEVAS FUNCIONES v3 ══════════════════════════════════════════════════ */
+/* Modalidad badge en perfil paciente */
+.mod-badge{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;font-size:10px;font-weight:700;flex-shrink:0;cursor:default;}
+.mod-U{background:#E0E7FF;color:#3730A3;}.mod-S{background:#D4F4EB;color:#0D5C4A;}.mod-Q{background:#EDE9FE;color:#5B21B6;}.mod-M{background:#FEF3C7;color:#92400E;}
+/* Alta paciente badge */
+.alta-badge{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;}
+.alta-medica{background:#D4F4EB;color:#0D5C4A;}.alta-derivacion{background:#DBEAFE;color:#1E40AF;}
+/* Pago estado en turno */
+.pago-badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;}
+.pago-abonado{background:#D4F4EB;color:#0D5C4A;}.pago-pendiente{background:#FFE4E4;color:#B91C1C;}.pago-seña{background:#FEF3C7;color:#92400E;}
+/* Alertas dashboard */
+.alerta-item{display:flex;align-items:flex-start;gap:12px;padding:11px 18px;border-bottom:1px solid var(--border);transition:background .12s;}
+.alerta-item:last-child{border-bottom:none;}
+.alerta-item:hover{background:var(--primary-xlight);}
+.alerta-urgente{background:#FEF2F2;}
+.alerta-cumple{background:linear-gradient(90deg,#FFFBEB,#fff 60%);}
+.alerta-ico{font-size:18px;flex-shrink:0;margin-top:1px;}
+.alerta-body{flex:1;min-width:0;}
+.alerta-msg{font-size:13px;font-weight:600;color:var(--text-primary);}
+.alerta-sub{font-size:11.5px;color:var(--text-secondary);margin-top:2px;}
+.alerta-accion{font-size:11.5px;color:var(--primary);font-weight:600;cursor:pointer;flex-shrink:0;padding:3px 10px;border-radius:6px;border:1px solid var(--primary-light);background:#fff;font-family:inherit;transition:all .13s;}
+.alerta-accion:hover{background:var(--primary-xlight);}
+/* Notif btn teléfono */
+.notif-pac-btn{width:27px;height:27px;border-radius:6px;border:1px solid var(--border);background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:all .13s;}
+.notif-pac-btn:hover{background:var(--primary-xlight);border-color:var(--primary);}
+.notif-pac-btn.notified{background:#D4F4EB !important;border-color:#9FE1CB !important;}
+/* Globos cumpleaños en calendario */
+.cumple-globo{position:absolute;top:-2px;right:1px;font-size:11px;animation:floatBalloon 2s ease-in-out infinite;pointer-events:none;z-index:2;}
+/* Modalidad selector en modal turno */
+.mod-sel-btn{padding:7px 4px;border:1.5px solid var(--border);border-radius:8px;cursor:pointer;text-align:center;font-size:11px;font-weight:600;transition:all .14s;background:#fff;color:var(--text-secondary);font-family:inherit;}
+.mod-sel-btn:hover{border-color:var(--primary);background:var(--primary-xlight);color:var(--primary-dark);}
+.mod-sel-btn.active{border-color:var(--primary);background:var(--primary-xlight);color:var(--primary-dark);}
+/* ═══ NUEVAS FUNCIONES v2 ═══════════════════════════════════════════════════ */
 /* Resumen del día colapsable */
 .resume-toggle-btn{background:none;border:none;cursor:pointer;padding:4px 6px;border-radius:6px;color:var(--text-muted);font-size:13px;display:flex;align-items:center;gap:5px;font-family:inherit;font-size:12.5px;font-weight:500;transition:all .14s;}
 .resume-toggle-btn:hover{background:var(--primary-xlight);color:var(--primary-dark);}
@@ -729,6 +761,16 @@ tbody tr:hover td{background:#F8FDFB;}
         </div>
       </div>
       <div class="kpi-grid" id="kpiGrid"></div>
+      <!-- PANEL DE ALERTAS -->
+      <div id="alertasPanel" style="display:none;background:#fff;border-radius:12px;border:1px solid var(--border);margin-bottom:18px;overflow:hidden">
+        <div onclick="toggleAlertasPanel()" style="display:flex;align-items:center;gap:8px;padding:12px 18px;border-bottom:1px solid var(--border);cursor:pointer;user-select:none;transition:background .12s" onmouseover="this.style.background='var(--primary-xlight)'" onmouseout="this.style.background=''">
+          <span style="font-size:18px">🔔</span>
+          <span style="font-size:14px;font-weight:700;color:var(--text-primary);flex:1">Alertas y avisos</span>
+          <span id="alertasCount" style="background:#B91C1C;color:#fff;font-size:10px;font-weight:700;padding:1px 7px;border-radius:10px;min-width:18px;text-align:center">0</span>
+          <span id="alertasChevron" style="font-size:12px;color:var(--text-muted)">▼</span>
+        </div>
+        <div id="alertasBody"></div>
+      </div>
       <div class="cal-wrap">
         <div class="cal-hdr">
           <button class="cal-nav-btn" onclick="calNav(-1)">‹</button>
@@ -1268,6 +1310,24 @@ tbody tr:hover td{background:#F8FDFB;}
             <option value="cancelado">Cancelado</option>
           </select>
         </div>
+        <div class="fg"><label class="flabel">Pago</label>
+          <select class="fsel" id="fPago">
+            <option value="">Sin definir</option>
+            <option value="pendiente_pago">Pendiente de pago</option>
+            <option value="seña">Seña</option>
+            <option value="abonado">Abonado</option>
+          </select>
+        </div>
+        <div class="fg full"><label class="flabel">Modalidad del espacio</label>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:4px" id="turnoModGrid">
+            <button type="button" class="mod-sel-btn" data-mod="unico" onclick="selectTurnoMod('unico')"><span style="display:block;font-size:16px;margin-bottom:3px">1️⃣</span>Único</button>
+            <button type="button" class="mod-sel-btn" data-mod="semanal" onclick="selectTurnoMod('semanal')"><span style="display:block;font-size:16px;margin-bottom:3px">📅</span>Semanal</button>
+            <button type="button" class="mod-sel-btn" data-mod="quincenal" onclick="selectTurnoMod('quincenal')"><span style="display:block;font-size:16px;margin-bottom:3px">🗓️</span>Quincenal</button>
+            <button type="button" class="mod-sel-btn" data-mod="mensual" onclick="selectTurnoMod('mensual')"><span style="display:block;font-size:16px;margin-bottom:3px">📆</span>Mensual</button>
+          </div>
+          <input type="hidden" id="fMod" value="">
+          <div id="fModInfo" style="display:none;font-size:11.5px;color:var(--text-secondary);margin-top:5px;padding:6px 10px;background:var(--primary-xlight);border-radius:6px;"></div>
+        </div>
         <div class="fg full"><label class="flabel">Notas</label><textarea class="ftxt" id="fN" placeholder="Observaciones..."></textarea></div>
       </div>
     </div>
@@ -1381,6 +1441,26 @@ tbody tr:hover td{background:#F8FDFB;}
         </div>
         <div class="fg full"><label class="flabel">Dirección</label><input type="text" class="finput" id="pDireccion" placeholder="Calle, número, ciudad"></div>
         <div class="fg full"><label class="flabel">Notas internas</label><textarea class="ftxt" id="pNotas" placeholder="Diagnóstico, derivación, observaciones..."></textarea></div>
+        <!-- ALTA DEL PACIENTE -->
+        <div class="fg full">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;font-weight:600;color:var(--text-secondary);margin-bottom:6px">
+            <input type="checkbox" id="pTieneAlta" onchange="toggleAltaSection()" style="width:15px;height:15px;accent-color:var(--primary);cursor:pointer">
+            Alta del paciente
+          </label>
+          <div id="pAltaFields" style="display:none;background:var(--primary-xlight);border-radius:10px;padding:13px;border:1px solid var(--border)">
+            <div class="form-grid">
+              <div class="fg"><label class="flabel">Tipo de alta</label>
+                <select class="fsel" id="pAltaTipo">
+                  <option value="medica">Alta médica</option>
+                  <option value="derivacion">Derivación</option>
+                </select>
+              </div>
+              <div class="fg"><label class="flabel">Fecha de alta</label><input type="date" class="finput" id="pAltaFecha"></div>
+            </div>
+            <div class="fg" style="margin-top:8px"><label class="flabel">Derivación / descripción breve</label><input type="text" class="finput" id="pAltaDescripcion" placeholder="Ej: Derivado a psiquiatría, alta voluntaria..."></div>
+            <div class="fg" style="margin-top:8px"><label class="flabel">Comentarios</label><textarea class="ftxt" id="pAltaComentarios" rows="2" placeholder="Observaciones del alta..."></textarea></div>
+          </div>
+        </div>
       </div>
     </div>
     <div class="md-ftr">
@@ -1625,14 +1705,16 @@ const AV_PALETTES=[
 // ─── NORMALIZACIÓN (snake_case BD → camelCase JS) ────────────────────────────
 const normPac = r => ({id:r.id,nombre:r.nombre,tel:r.tel||'',email:r.email||'',
   fechaNac:r.fecha_nac||'',obraSocial:r.obra_social||'',direccion:r.direccion||'',notas:r.notas||'',
-  profesionalAsignado:r.profesional_asignado||'',avatarUrl:r.avatar_url||'',sede_id:r.sede_id||null});
+  profesionalAsignado:r.profesional_asignado||'',avatarUrl:r.avatar_url||'',sede_id:r.sede_id||null,
+  modalidad:r.modalidad||'',tieneAlta:r.tiene_alta||false,altaTipo:r.alta_tipo||'',
+  altaFecha:r.alta_fecha||'',altaDescripcion:r.alta_descripcion||'',altaComentarios:r.alta_comentarios||''});
 const normPro = r => ({id:r.id,nombre:r.nombre,especialidad:r.especialidad||'',
   tel:r.tel||'',email:r.email||'',tarifa:Number(r.tarifa)||0,
   matricula:r.matricula||'',disponibilidad:r.disponibilidad||'',notas:r.notas||'',avatarUrl:r.avatar_url||'',sede_id:r.sede_id||null});
 const normTur = r => ({id:r.id,paciente:r.paciente,profesional:r.profesional,
   fecha:r.fecha,hora:r.hora,importe:Number(r.importe)||0,estado:r.estado||'pendiente_confirmar',
   notas:r.notas||'',pacienteNotificado:r.paciente_notificado||false,recordatorioEnviado:r.recordatorio_enviado||false,
-  sede_id:r.sede_id||null});
+  sede_id:r.sede_id||null,pago:r.pago||'',modalidad:r.modalidad||''});
 const normSol = r => ({id:r.id,turnoId:r.turno_id,profesional:r.profesional,paciente:r.paciente,
   cambios:r.cambios||{},datosOriginales:r.datos_originales||{},estado:r.estado,notaAdmin:r.nota_admin||'',createdAt:r.created_at});
 
@@ -3304,287 +3386,293 @@ function resetTimePicker(){
   document.getElementById('fH').value='';_pickerH=null;
 }
 // ════════════════════════════════════════════════════════════════════════════
-//  NUEVAS FUNCIONES v2
+// ════════════════════════════════════════════════════════════════════════════
+//  FUNCIONES VINCULAR (v2 + v3 unificadas)
 // ════════════════════════════════════════════════════════════════════════════
 
-// ─── FUNCIÓN 3: Resumen del día colapsable ───────────────────────────────────
+// ─── Resumen del día colapsable ──────────────────────────────────────────────
 let resumeCollapsed = false;
 function toggleResumenHoy() {
   resumeCollapsed = !resumeCollapsed;
   const body = document.getElementById('resumeCollapsible');
   const chevron = document.getElementById('resumeChevron');
   const label = document.getElementById('resumeToggleLabel');
-  if (resumeCollapsed) {
-    body.style.display = 'none';
-    chevron.classList.add('collapsed');
-    label.textContent = 'Mostrar';
-  } else {
-    body.style.display = '';
-    chevron.classList.remove('collapsed');
-    label.textContent = 'Ocultar';
-  }
+  if (resumeCollapsed) { body.style.display='none'; chevron.classList.add('collapsed'); if(label)label.textContent='Mostrar'; }
+  else { body.style.display=''; chevron.classList.remove('collapsed'); if(label)label.textContent='Ocultar'; }
 }
 
-// ─── FUNCIÓN 2: Modalidad de turnos al crear paciente ────────────────────────
+// ─── Modalidad nuevo paciente ─────────────────────────────────────────────────
 let selectedModalidad = '';
 function selectModalidad(tipo) {
   selectedModalidad = tipo;
-  document.getElementById('pModalidad').value = tipo;
-  ['semanal','quincenal','mensual'].forEach(t => {
-    document.getElementById('mod-'+t).classList.toggle('selected', t === tipo);
-  });
+  const el = document.getElementById('pModalidad'); if(el) el.value = tipo;
+  ['semanal','quincenal','mensual'].forEach(t => { const b = document.getElementById('mod-'+t); if(b) b.classList.toggle('selected', t===tipo); });
   const msgs = {
-    semanal: 'Se generarán turnos <strong>semanales</strong> (mismo día y horario cada semana). Quedarán como <strong>Pendiente de confirmar</strong>.',
-    quincenal: 'Se generarán turnos <strong>quincenales</strong> (mismo día cada 15 días). Quedarán como <strong>Pendiente de confirmar</strong>.',
-    mensual: 'Se generará un turno en el <strong>mismo día del próximo mes</strong>. Quedará como <strong>Pendiente de confirmar</strong>.'
+    semanal:'Se generarán turnos <strong>semanales</strong>. Quedarán como <strong>Pendiente de confirmar</strong>.',
+    quincenal:'Se generarán turnos <strong>quincenales</strong> (cada 15 días). Quedarán como <strong>Pendiente de confirmar</strong>.',
+    mensual:'Se generará un turno en el <strong>mismo día del próximo mes</strong>. Quedará como <strong>Pendiente de confirmar</strong>.'
   };
-  const notice = document.getElementById('modalidadNotice');
-  document.getElementById('modalidadNoticeText').innerHTML = msgs[tipo] || '';
+  const notice = document.getElementById('modalidadNotice'); if(!notice) return;
+  const txt = document.getElementById('modalidadNoticeText'); if(txt) txt.innerHTML = msgs[tipo]||'';
   notice.classList.add('show');
 }
-
-// Mostrar sección primer turno cuando se asigna un profesional nuevo
 function onProfAsignadoChange() {
   const val = document.getElementById('pProfAsignado').value;
   const section = document.getElementById('pacModalidadSection');
-  if (section) {
-    if (!editPacId && val) {
+  if(section) {
+    if(!editPacId && val) {
       section.style.display = '';
-      // Poblar horas disponibles
-      const hIni = parseInt((currentSede?.horario_inicio || '08:00').split(':')[0]);
-      const hFin = parseInt((currentSede?.horario_fin || '20:00').split(':')[0]);
+      const hIni = parseInt((currentSede?.horario_inicio||'08:00').split(':')[0]);
+      const hFin = parseInt((currentSede?.horario_fin||'20:00').split(':')[0]);
       const sel = document.getElementById('pPrimerHora');
-      sel.innerHTML = '<option value="">Seleccionar...</option>';
-      for (let h = hIni; h <= hFin; h++) {
-        sel.innerHTML += `<option value="${String(h).padStart(2,'0')}:00">${String(h).padStart(2,'0')}:00</option>`;
-        if (h < hFin) sel.innerHTML += `<option value="${String(h).padStart(2,'0')}:30">${String(h).padStart(2,'0')}:30</option>`;
-      }
-      const fIni = document.getElementById('pPrimerFecha');
-      if (fIni && !fIni.value) fIni.value = TSTR;
-    } else {
-      section.style.display = 'none';
-    }
+      if(sel) { sel.innerHTML = '<option value="">Seleccionar...</option>'; for(let h=hIni;h<=hFin;h++){sel.innerHTML+=`<option value="${String(h).padStart(2,'0')}:00">${String(h).padStart(2,'0')}:00</option>`;} }
+      const fIni = document.getElementById('pPrimerFecha'); if(fIni&&!fIni.value) fIni.value=TSTR;
+    } else { section.style.display='none'; }
   }
 }
-
-// Generar turnos por modalidad
-async function generarTurnosPorModalidad(pacienteNombre, profesionalNombre, fechaBase, hora, modalidad) {
-  if (!modalidad || !fechaBase || !hora) return;
-  const tarifahProf = PROFESIONALES.find(p => p.nombre === profesionalNombre)?.tarifa || 0;
-  const turnos = [];
-  const base = new Date(fechaBase + 'T12:00:00');
-
-  if (modalidad === 'semanal') {
-    // 4 turnos semanales siguientes
-    for (let i = 1; i <= 4; i++) {
-      const d = new Date(base);
-      d.setDate(d.getDate() + i * 7);
-      turnos.push(fmt(d));
-    }
-  } else if (modalidad === 'quincenal') {
-    for (let i = 1; i <= 2; i++) {
-      const d = new Date(base);
-      d.setDate(d.getDate() + i * 15);
-      turnos.push(fmt(d));
-    }
-  } else if (modalidad === 'mensual') {
-    const d = new Date(base);
-    d.setMonth(d.getMonth() + 1);
-    turnos.push(fmt(d));
+async function generarTurnosPorModalidad(pac,pro,fechaBase,hora,modalidad) {
+  if(!modalidad||!fechaBase||!hora) return;
+  const tarifa = PROFESIONALES.find(p=>p.nombre===pro)?.tarifa||0;
+  const fechas = [];
+  const base = new Date(fechaBase+'T12:00:00');
+  if(modalidad==='semanal'){for(let i=1;i<=4;i++){const d=new Date(base);d.setDate(d.getDate()+i*7);fechas.push(fmt(d));}}
+  else if(modalidad==='quincenal'){for(let i=1;i<=2;i++){const d=new Date(base);d.setDate(d.getDate()+i*15);fechas.push(fmt(d));}}
+  else if(modalidad==='mensual'){const d=new Date(base);d.setMonth(d.getMonth()+1);fechas.push(fmt(d));}
+  for(const fecha of fechas){
+    try{const{data:row,error}=await db.from('turnos').insert({paciente:pac,profesional:pro,fecha,hora,importe:tarifa,estado:'pendiente_confirmar',modalidad,notas:`Modalidad ${modalidad}`,...(currentSedeId&&{sede_id:currentSedeId})}).select().single();if(!error&&row)TURNOS.unshift(row);}catch(e){console.warn(e);}
   }
-
-  for (const fecha of turnos) {
-    const payload = {
-      paciente: pacienteNombre,
-      profesional: profesionalNombre,
-      fecha,
-      hora,
-      importe: tarifahProf,
-      estado: 'pendiente_confirmar',
-      notas: `Generado por modalidad ${modalidad}`,
-      ...(currentSedeId && { sede_id: currentSedeId })
-    };
-    try {
-      const { data: row, error } = await db.from('turnos').insert(payload).select().single();
-      if (!error && row) TURNOS.unshift(normTur(row));
-    } catch (e) { console.warn('Error generando turno modal:', e); }
-  }
-  toast(`✓ ${turnos.length} turno${turnos.length > 1 ? 's' : ''} ${modalidad}${turnos.length > 1 ? 'es' : ''} generados como pendiente de confirmar`);
+  toast(`✓ Turnos ${modalidad}es generados como pendiente de confirmar`);
 }
 
-// ─── FUNCIÓN 1 y 4: Modal de Reprogramar turno ───────────────────────────────
+// ─── Modal reprogramar (apertura/cierre/guardado) ────────────────────────────
 let _reprogH = null;
-
 function openReprogramarModal(id) {
-  const t = TURNOS.find(x => x.id === id);
-  if (!t) return;
+  const t = TURNOS.find(x=>x.id===id); if(!t) return;
   document.getElementById('reprogTurnoId').value = id;
   document.getElementById('reprogTurnoInfo').textContent = `${t.paciente} · ${fmtDate(t.fecha)} ${t.hora}`;
   document.getElementById('reprogFecha').value = t.fecha;
   document.getElementById('reprogHora').value = '';
   resetReprogPicker();
   document.getElementById('moReprogramar').classList.add('open');
-  setTimeout(() => buildReprogTimePicker(), 50);
+  setTimeout(()=>buildReprogTimePicker(),50);
 }
-function closeReprogramarModal() {
-  document.getElementById('moReprogramar').classList.remove('open');
-  _reprogH = null;
-}
-
+function closeReprogramarModal() { document.getElementById('moReprogramar').classList.remove('open'); _reprogH=null; }
 function buildReprogTimePicker() {
-  const fecha = document.getElementById('reprogFecha').value;
-  const id = document.getElementById('reprogTurnoId').value;
-  const ocup = getOcupados(fecha, id);
-  _reprogH = null;
-  document.getElementById('reprogHora').value = '';
-  document.getElementById('reprogMinuteRow').style.display = 'none';
-  document.getElementById('reprogTimeResult').style.display = 'none';
-  const hWrap = document.getElementById('reprogHourBtns');
-  hWrap.innerHTML = '';
-  const hIni = parseInt((currentSede?.horario_inicio || '08:00').split(':')[0]);
-  const hFin = parseInt((currentSede?.horario_fin || '20:00').split(':')[0]);
-  for (let h = hIni; h <= hFin; h++) {
-    let libre = false;
-    for (let m = 0; m < 60; m += 5) { if (!isOcupado(h * 60 + m, ocup)) { libre = true; break; } }
-    const btn = document.createElement('button');
-    btn.type = 'button'; btn.textContent = String(h).padStart(2, '0') + ':00'; btn.dataset.h = h;
-    const base = 'font-size:11px;padding:4px 8px;border-radius:5px;border:1px solid;font-family:inherit;font-weight:500;transition:all .12s;';
-    if (libre) {
-      btn.style.cssText = base + 'cursor:pointer;background:#fff;border-color:var(--border);color:var(--text-primary);';
-      btn.onclick = () => selectReprogHour(h, ocup);
-    } else {
-      btn.style.cssText = base + 'cursor:not-allowed;background:#F3F4F6;border-color:#E5E7EB;color:#D1D5DB;';
-      btn.disabled = true;
-    }
+  const fecha=document.getElementById('reprogFecha').value;
+  const id=document.getElementById('reprogTurnoId').value;
+  const ocup=getOcupados(fecha,id);
+  _reprogH=null; document.getElementById('reprogHora').value='';
+  document.getElementById('reprogMinuteRow').style.display='none';
+  document.getElementById('reprogTimeResult').style.display='none';
+  const hWrap=document.getElementById('reprogHourBtns'); hWrap.innerHTML='';
+  const hIni=parseInt((currentSede?.horario_inicio||'08:00').split(':')[0]);
+  const hFin=parseInt((currentSede?.horario_fin||'20:00').split(':')[0]);
+  for(let h=hIni;h<=hFin;h++){
+    let libre=false;for(let m=0;m<60;m+=5){if(!isOcupado(h*60+m,ocup)){libre=true;break;}}
+    const btn=document.createElement('button');btn.type='button';btn.textContent=String(h).padStart(2,'0')+':00';btn.dataset.h=h;
+    const base='font-size:11px;padding:4px 8px;border-radius:5px;border:1px solid;font-family:inherit;font-weight:500;transition:all .12s;';
+    if(libre){btn.style.cssText=base+'cursor:pointer;background:#fff;border-color:var(--border);color:var(--text-primary);';btn.onclick=()=>selectReprogHour(h,ocup);}
+    else{btn.style.cssText=base+'cursor:not-allowed;background:#F3F4F6;border-color:#E5E7EB;color:#D1D5DB;';btn.disabled=true;}
     hWrap.appendChild(btn);
   }
 }
-
-function selectReprogHour(h, ocup) {
-  _reprogH = h;
-  document.querySelectorAll('#reprogHourBtns button').forEach(b => { b.classList.remove('sel'); if (!b.disabled) b.style.background = '#fff'; });
-  const ab = document.querySelector('#reprogHourBtns button[data-h="' + h + '"]');
-  if (ab) { ab.style.background = 'var(--primary-light)'; ab.style.borderColor = 'var(--primary)'; ab.style.color = 'var(--primary-dark)'; }
-  const mWrap = document.getElementById('reprogMinuteBtns'); mWrap.innerHTML = '';
-  for (let m = 0; m < 60; m += 5) {
-    const ocu = isOcupado(h * 60 + m, ocup);
-    const btn = document.createElement('button'); btn.type = 'button';
-    btn.textContent = String(m).padStart(2, '0'); btn.dataset.m = m;
-    const base = 'font-size:11px;padding:4px 8px;border-radius:5px;border:1px solid;font-family:inherit;font-weight:500;transition:all .12s;';
-    if (!ocu) {
-      btn.style.cssText = base + 'cursor:pointer;background:#fff;border-color:var(--border);color:var(--text-primary);';
-      btn.onclick = () => selectReprogMinute(h, m);
-    } else {
-      btn.style.cssText = base + 'cursor:not-allowed;background:#F3F4F6;border-color:#E5E7EB;color:#D1D5DB;';
-      btn.disabled = true;
-    }
+function selectReprogHour(h,ocup){
+  _reprogH=h;
+  document.querySelectorAll('#reprogHourBtns button').forEach(b=>{if(!b.disabled)b.style.background='#fff';b.style.borderColor='var(--border)';b.style.color='var(--text-primary)';});
+  const ab=document.querySelector('#reprogHourBtns button[data-h="'+h+'"]');
+  if(ab){ab.style.background='var(--primary-light)';ab.style.borderColor='var(--primary)';ab.style.color='var(--primary-dark)';}
+  const mWrap=document.getElementById('reprogMinuteBtns');mWrap.innerHTML='';
+  for(let m=0;m<60;m+=5){
+    const ocu=isOcupado(h*60+m,ocup);const btn=document.createElement('button');btn.type='button';
+    btn.textContent=String(m).padStart(2,'0');btn.dataset.m=m;
+    const base='font-size:11px;padding:4px 8px;border-radius:5px;border:1px solid;font-family:inherit;font-weight:500;transition:all .12s;';
+    if(!ocu){btn.style.cssText=base+'cursor:pointer;background:#fff;border-color:var(--border);color:var(--text-primary);';btn.onclick=()=>selectReprogMinute(h,m);}
+    else{btn.style.cssText=base+'cursor:not-allowed;background:#F3F4F6;border-color:#E5E7EB;color:#D1D5DB;';btn.disabled=true;}
     mWrap.appendChild(btn);
   }
-  document.getElementById('reprogMinuteRow').style.display = 'flex';
+  document.getElementById('reprogMinuteRow').style.display='flex';
 }
-
-function selectReprogMinute(h, m) {
-  const time = String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
-  document.getElementById('reprogHora').value = time;
-  document.querySelectorAll('#reprogMinuteBtns button').forEach(b => { if (!b.disabled) b.style.background = '#fff'; });
-  const ab = document.querySelector('#reprogMinuteBtns button[data-m="' + m + '"]');
-  if (ab) { ab.style.background = 'var(--primary-light)'; ab.style.borderColor = 'var(--primary)'; ab.style.color = 'var(--primary-dark)'; }
-  const res = document.getElementById('reprogTimeResult');
-  res.textContent = 'Nuevo horario: ' + time + 'hs'; res.style.display = 'block';
+function selectReprogMinute(h,m){
+  const time=String(h).padStart(2,'0')+':'+String(m).padStart(2,'0');
+  document.getElementById('reprogHora').value=time;
+  document.querySelectorAll('#reprogMinuteBtns button').forEach(b=>{if(!b.disabled)b.style.background='#fff';});
+  const ab=document.querySelector('#reprogMinuteBtns button[data-m="'+m+'"]');
+  if(ab){ab.style.background='var(--primary-light)';ab.style.borderColor='var(--primary)';ab.style.color='var(--primary-dark)';}
+  const res=document.getElementById('reprogTimeResult');res.textContent='Nuevo horario: '+time+'hs';res.style.display='block';
 }
-
-function clearReprogHour() {
-  _reprogH = null; document.getElementById('reprogHora').value = '';
-  document.getElementById('reprogMinuteRow').style.display = 'none';
-  document.getElementById('reprogTimeResult').style.display = 'none';
-  document.querySelectorAll('#reprogHourBtns button').forEach(b => { if (!b.disabled) b.style.background = '#fff'; });
-}
-
-function resetReprogPicker() {
-  const hb = document.getElementById('reprogHourBtns'); const mb = document.getElementById('reprogMinuteBtns');
-  if (hb) hb.innerHTML = ''; if (mb) mb.innerHTML = '';
-  const mr = document.getElementById('reprogMinuteRow'); const tr = document.getElementById('reprogTimeResult');
-  if (mr) mr.style.display = 'none'; if (tr) tr.style.display = 'none';
-  document.getElementById('reprogHora').value = ''; _reprogH = null;
-}
-
+function clearReprogHour(){_reprogH=null;document.getElementById('reprogHora').value='';document.getElementById('reprogMinuteRow').style.display='none';document.getElementById('reprogTimeResult').style.display='none';document.querySelectorAll('#reprogHourBtns button').forEach(b=>{if(!b.disabled)b.style.background='#fff';});}
+function resetReprogPicker(){const hb=document.getElementById('reprogHourBtns');const mb=document.getElementById('reprogMinuteBtns');if(hb)hb.innerHTML='';if(mb)mb.innerHTML='';const mr=document.getElementById('reprogMinuteRow');const tr=document.getElementById('reprogTimeResult');if(mr)mr.style.display='none';if(tr)tr.style.display='none';document.getElementById('reprogHora').value='';_reprogH=null;}
 async function saveReprogramar() {
-  const id = document.getElementById('reprogTurnoId').value;
-  const fecha = document.getElementById('reprogFecha').value;
-  const hora = document.getElementById('reprogHora').value;
-  if (!fecha || !hora) { toast('⚠️ Seleccioná fecha y horario', true); return; }
-  const t = TURNOS.find(x => x.id === id);
-  if (!t) return;
-  setBusy('btnSaveReprog', true);
-  try {
-    // 1. Marcar turno original como reprogramado
-    const { error: e1 } = await db.from('turnos').update({ estado: 'reprogramado' }).eq('id', id);
-    if (e1) throw e1;
-    const i = TURNOS.findIndex(x => x.id === id);
-    if (i >= 0) TURNOS[i].estado = 'reprogramado';
-
-    // 2. Crear el nuevo turno como pendiente_confirmar
-    const payload = {
-      paciente: t.paciente,
-      profesional: t.profesional,
-      fecha,
-      hora,
-      importe: t.importe,
-      estado: 'pendiente_confirmar',
-      notas: `Reprogramado desde ${fmtDate(t.fecha)} ${t.hora}`,
-      ...(currentSedeId && { sede_id: currentSedeId })
-    };
-    const { data: row, error: e2 } = await db.from('turnos').insert(payload).select().single();
-    if (e2) throw e2;
-    TURNOS.unshift(normTur(row));
-
+  const id=document.getElementById('reprogTurnoId').value;
+  const fecha=document.getElementById('reprogFecha').value;
+  const hora=document.getElementById('reprogHora').value;
+  if(!fecha||!hora){toast('⚠️ Seleccioná fecha y horario',true);return;}
+  const t=TURNOS.find(x=>x.id===id);if(!t)return;
+  setBusy('btnSaveReprog',true);
+  try{
+    const{error:e1}=await db.from('turnos').update({estado:'reprogramado'}).eq('id',id);if(e1)throw e1;
+    const i=TURNOS.findIndex(x=>x.id===id);if(i>=0)TURNOS[i].estado='reprogramado';
+    const{data:row,error:e2}=await db.from('turnos').insert({paciente:t.paciente,profesional:t.profesional,fecha,hora,importe:t.importe,estado:'pendiente_confirmar',notas:`Reprogramado desde ${fmtDate(t.fecha)} ${t.hora}`,...(currentSedeId&&{sede_id:currentSedeId})}).select().single();
+    if(e2)throw e2;
+    TURNOS.unshift(row);
     closeReprogramarModal();
     toast(`✓ Turno reprogramado: ${fmtDate(fecha)} ${hora}hs · Pendiente de confirmar`);
-    renderDash();
-    if (document.getElementById('page-turnos').classList.contains('active')) renderTable();
-    if (document.getElementById('page-agenda').classList.contains('active')) renderAgenda();
-  } catch (err) { toast('❌ Error: ' + (err.message || ''), true); }
-  setBusy('btnSaveReprog', false);
+    renderDash();if(document.getElementById('page-turnos').classList.contains('active'))renderTable();if(document.getElementById('page-agenda').classList.contains('active'))renderAgenda();
+  }catch(err){toast('❌ Error: '+(err.message||''),true);}
+  setBusy('btnSaveReprog',false);
 }
 
-// ─── FUNCIÓN 1: Al cambiar estado a "reprogramado" abrir modal automático ────
-// Override applyStModal para detectar reprogramado
-const _origApplyStModal = applyStModal;
-async function applyStModal() {
-  if (selStat === 'reprogramado') {
-    // Cerrar modal de estado y abrir modal de reprogramación
-    const idToReschedule = statTgtId;
-    closeStModal();
-    openReprogramarModal(idToReschedule);
-    return;
-  }
-  await _origApplyStModal();
+// ─── Pago helpers ─────────────────────────────────────────────────────────────
+function pagoLabel(p){return{abonado:'Abonado',pendiente_pago:'Pend. pago',seña:'Seña'}[p]||'';}
+function pagoClass(p){return{abonado:'pago-abonado',pendiente_pago:'pago-pendiente',seña:'pago-seña'}[p]||'';}
+
+// ─── Badge modalidad ──────────────────────────────────────────────────────────
+function modBadgeHTML(mod){
+  if(!mod)return'';
+  const map={unico:['U','mod-U'],semanal:['S','mod-S'],quincenal:['Q','mod-Q'],mensual:['M','mod-M']};
+  const[letra,cls]=map[mod]||[];if(!letra)return'';
+  return`<span class="mod-badge ${cls}" title="Modalidad: ${mod}">${letra}</span>`;
 }
 
-// ─── FUNCIÓN 4: Botón ícono reprogramar en filas de turnos ───────────────────
-// Se inyecta via renderTable y renderAgenda — ver accionesConReprog()
-function accionesConReprog(t) {
-  if (isAdmin || isCentro) {
-    return `<div class="act-cell">
+// ─── Badge alta ───────────────────────────────────────────────────────────────
+function altaBadgeHTML(pac){
+  if(!pac||!pac.tieneAlta)return'';
+  if(pac.altaTipo==='medica')return`<span class="alta-badge alta-medica">⭐ Alta</span>`;
+  if(pac.altaTipo==='derivacion')return`<span class="alta-badge alta-derivacion">↔ Deriv.</span>`;
+  return'';
+}
+
+// ─── Alta del paciente toggle ──────────────────────────────────────────────────
+function toggleAltaSection(){
+  const cb=document.getElementById('pTieneAlta');
+  const fields=document.getElementById('pAltaFields');
+  if(fields)fields.style.display=cb.checked?'':'none';
+  if(cb.checked){const fh=document.getElementById('pAltaFecha');if(fh&&!fh.value)fh.value=TSTR;}
+}
+
+// ─── Modalidad selector en modal turno ────────────────────────────────────────
+function selectTurnoMod(mod){
+  document.getElementById('fMod').value=mod;
+  document.querySelectorAll('#turnoModGrid .mod-sel-btn').forEach(b=>b.classList.toggle('active',b.dataset.mod===mod));
+  const dias=['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+  const f=document.getElementById('fF').value;
+  const dname=f?dias[new Date(f+'T12:00').getDay()]:'ese día';
+  const info={unico:'1️⃣ Turno único — al finalizar se consultará si reprogramar.',semanal:`📅 Semanal — reservado todos los ${dname}.`,quincenal:'🗓️ Quincenal — cada 15 días.',mensual:'📆 Mensual — mismo día del próximo mes.'};
+  const el=document.getElementById('fModInfo');if(el){el.textContent=info[mod]||'';el.style.display=mod?'':'none';}
+}
+function resetTurnoMod(){
+  const fm=document.getElementById('fMod');if(fm)fm.value='';
+  document.querySelectorAll('#turnoModGrid .mod-sel-btn').forEach(b=>b.classList.remove('active'));
+  const el=document.getElementById('fModInfo');if(el)el.style.display='none';
+}
+
+// ─── Ícono notificar paciente ─────────────────────────────────────────────────
+function notifPacIconHTML(t){
+  if(!isAdmin&&!isCentro)return'';
+  if(t.estado!=='confirmado')return'';
+  return`<button class="notif-pac-btn${t.pacienteNotificado?' notified':''}" title="${t.pacienteNotificado?'✓ Paciente notificado':'Notificar paciente'}" onclick="notificarPaciente('${t.id}')">📱</button>`;
+}
+
+// ─── Acciones turno con reprogramar ──────────────────────────────────────────
+function accionesConReprog(t){
+  if(isAdmin||isCentro){
+    return`<div class="act-cell">
       <button class="act-btn" title="Editar" onclick="openTurnoModal('${t.id}')">✏️</button>
       <button class="act-btn" title="Cambiar estado" onclick="openStModal('${t.id}')">⟳</button>
       <button class="reprogram-icon-btn" title="Reprogramar" onclick="openReprogramarModal('${t.id}')">↺</button>
-      ${t.estado==='confirmado'&&!t.pacienteNotificado?`<button class="act-btn" title="Notificar paciente" onclick="notificarPaciente('${t.id}')" style="background:#D4F4EB;border-color:#9FE1CB;font-size:11px;width:auto;padding:0 8px">📲 Notif. paciente</button>`:''}
-      ${t.estado==='confirmado'&&t.pacienteNotificado?`<span title="Paciente notificado" style="font-size:12px;padding:0 4px;color:#0D5C4A">✓📧</span>`:''}
+      ${notifPacIconHTML(t)}
       <button class="act-btn del" title="Eliminar" onclick="delTurno('${t.id}')">🗑️</button>
     </div>`;
   }
-  return `<div class="act-cell">
-    ${t.estado==='pendiente_confirmar'
-      ?`<button class="act-btn" title="Confirmar turno" onclick="confirmarTurno('${t.id}')" style="background:#D4F4EB;border-color:#9FE1CB;font-size:11px;width:auto;padding:0 8px">✓ Confirmar</button>`
-      :`<button class="act-btn" title="Solicitar cambio" onclick="openSolicitudModal('${t.id}')" style="font-size:11px;width:auto;padding:0 8px">✏️ Solicitar</button>`
-    }
+  return`<div class="act-cell">
+    ${t.estado==='pendiente_confirmar'?`<button class="act-btn" onclick="confirmarTurno('${t.id}')" style="background:#D4F4EB;border-color:#9FE1CB;font-size:11px;width:auto;padding:0 8px">✓ Confirmar</button>`:`<button class="act-btn" onclick="openSolicitudModal('${t.id}')" style="font-size:11px;width:auto;padding:0 8px">✏️ Solicitar</button>`}
     <button class="reprogram-icon-btn" title="Reprogramar" onclick="openSolicitudModal('${t.id}')">↺</button>
   </div>`;
 }
 
+// ─── Diálogo turno único finalizado ──────────────────────────────────────────
+function showUnicoDialog(t){
+  return new Promise(resolve=>{
+    const ov=document.createElement('div');
+    ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.42);z-index:2000;display:flex;align-items:center;justify-content:center;padding:20px';
+    ov.innerHTML=`<div style="background:#fff;border-radius:16px;padding:24px 28px;max-width:400px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.2)">
+      <div style="font-size:17px;font-weight:700;color:var(--text-primary);margin-bottom:6px">Turno único finalizado</div>
+      <div style="font-size:13px;color:var(--text-secondary);margin-bottom:20px">El turno de <strong>${t.paciente}</strong> (${fmtDate(t.fecha)} ${t.hora}) era único.<br>¿Qué querés hacer?</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <button data-v="reprogramar" style="padding:11px 14px;border-radius:8px;border:1px solid var(--primary);background:var(--primary-xlight);color:var(--primary-dark);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;text-align:left">↺ Reprogramar este turno</button>
+        <button data-v="semanal" style="padding:10px 14px;border-radius:8px;border:1px solid var(--border);background:#fff;color:var(--text-primary);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;text-align:left">📅 Convertir a semanal</button>
+        <button data-v="quincenal" style="padding:10px 14px;border-radius:8px;border:1px solid var(--border);background:#fff;color:var(--text-primary);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;text-align:left">🗓️ Convertir a quincenal</button>
+        <button data-v="mensual" style="padding:10px 14px;border-radius:8px;border:1px solid var(--border);background:#fff;color:var(--text-primary);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;text-align:left">📆 Convertir a mensual</button>
+        <button data-v="nada" style="padding:9px 14px;border-radius:8px;border:1px solid var(--border);background:#fff;color:var(--text-muted);font-size:12px;cursor:pointer;font-family:inherit;text-align:left">Era único, no reprogramar</button>
+      </div>
+    </div>`;
+    ov.querySelectorAll('button[data-v]').forEach(btn=>{btn.onclick=()=>{ov.remove();resolve(btn.dataset.v);};});
+    document.body.appendChild(ov);
+  });
+}
+
+// ─── Generar turnos por modalidad con validación de conflictos ────────────────
+async function generarTurnosModalidad(pac,pro,fechaBase,hora,mod){
+  const base=new Date(fechaBase+'T12:00:00');
+  const tarifa=PROFESIONALES.find(p=>p.nombre===pro)?.tarifa||0;
+  const fechas=[];
+  if(mod==='semanal'){for(let i=1;i<=8;i++){const d=new Date(base);d.setDate(d.getDate()+i*7);fechas.push(fmt(d));}}
+  else if(mod==='quincenal'){for(let i=1;i<=4;i++){const d=new Date(base);d.setDate(d.getDate()+i*15);fechas.push(fmt(d));}}
+  else if(mod==='mensual'){for(let i=1;i<=3;i++){const d=new Date(base);d.setMonth(d.getMonth()+i);fechas.push(fmt(d));}}
+  const[hh,mm]=(hora.split(':').map(Number));const minI=hh*60+mm;
+  const conflictos=[],libres=[];
+  fechas.forEach(f=>{if(isOcupado(minI,getOcupados(f,null)))conflictos.push(f);else libres.push(f);});
+  if(conflictos.length)toast(`⚠️ ${conflictos.length} fecha(s) con conflicto: ${conflictos.slice(0,2).map(f=>fmtDate(f)).join(', ')}`,true);
+  let creados=0;
+  for(const fecha of libres){
+    try{const{data:row,error}=await db.from('turnos').insert({paciente:pac,profesional:pro,fecha,hora,importe:tarifa,estado:'pendiente_confirmar',modalidad:mod,notas:`Modalidad ${mod}`,...(currentSedeId&&{sede_id:currentSedeId})}).select().single();if(!error&&row){TURNOS.unshift(row);creados++;}}catch(e){console.warn(e);}
+  }
+  if(creados){toast(`✓ ${creados} turno(s) generados · ${mod} · Pendiente de confirmar`);renderDash();if(document.getElementById('page-turnos').classList.contains('active'))renderTable();}
+}
+
+// ─── Alertas dashboard ────────────────────────────────────────────────────────
+let alertasCollapsed=false;
+function toggleAlertasPanel(){
+  alertasCollapsed=!alertasCollapsed;
+  const body=document.getElementById('alertasBody');const chev=document.getElementById('alertasChevron');
+  if(body)body.style.display=alertasCollapsed?'none':'';
+  if(chev)chev.textContent=alertasCollapsed?'▶':'▼';
+}
+function renderAlertas(){
+  const alertas=[];const ahora=new Date();const en24=new Date(ahora.getTime()+24*60*60*1000);
+  TURNOS.forEach(t=>{
+    if(t.estado!=='pendiente'&&t.estado!=='pendiente_confirmar')return;
+    try{const ft=new Date(t.fecha+'T'+(t.hora||'00:00')+':00');if(ft>ahora&&ft<=en24){alertas.push({tipo:'urgente',ico:'⚠️',msg:'Turno sin confirmar en menos de 24hs',sub:`${t.paciente} · ${fmtDate(t.fecha)} ${t.hora} · ${t.profesional}`,accionLabel:'Confirmar',onclick:`openStModal('${t.id}')`,});}}catch(e){}
+  });
+  TURNOS.filter(t=>t.estado==='confirmado'&&t.pago==='pendiente_pago').forEach(t=>{
+    alertas.push({tipo:'pago',ico:'💰',msg:'Turno sin abonar',sub:`${t.paciente} · ${fmtDate(t.fecha)} ${t.hora}`,accionLabel:'Registrar pago',onclick:`openTurnoModal('${t.id}')`});
+  });
+  PACIENTES.forEach(p=>{
+    if(!p.fechaNac)return;const b=new Date(p.fechaNac+'T12:00');const n=new Date();
+    if(b.getMonth()===n.getMonth()&&b.getDate()===n.getDate()){const edad=calcEdad(p.fechaNac);alertas.push({tipo:'cumple',ico:'🎂',msg:`¡Hoy cumple años ${p.nombre}!`,sub:edad?`Cumple ${edad} años hoy 🎉`:'',accionLabel:'Ver perfil',onclick:`openDrawer('pac','${p.id}')`});}
+  });
+  const panel=document.getElementById('alertasPanel');const body=document.getElementById('alertasBody');const count=document.getElementById('alertasCount');
+  if(!panel)return;
+  if(!alertas.length){panel.style.display='none';return;}
+  panel.style.display='';if(count)count.textContent=alertas.length;
+  body.innerHTML=alertas.map(a=>`<div class="alerta-item${a.tipo==='urgente'?' alerta-urgente':a.tipo==='cumple'?' alerta-cumple':''}">
+    <div class="alerta-ico">${a.ico}</div>
+    <div class="alerta-body"><div class="alerta-msg">${a.msg}</div><div class="alerta-sub">${a.sub}</div></div>
+    <button class="alerta-accion" onclick="${a.onclick}">${a.accionLabel}</button>
+  </div>`).join('');
+}
+
+// ─── Globos cumpleaños en calendario ─────────────────────────────────────────
+function addCumpleGlobos(){
+  const today=new Date();const set=new Set();
+  PACIENTES.forEach(p=>{if(!p.fechaNac)return;const b=new Date(p.fechaNac+'T12:00');for(let o=0;o<=1;o++){try{set.add(fmt(new Date(today.getFullYear(),today.getMonth()+o,b.getDate())));}catch(e){}}});
+  set.forEach(fecha=>{document.querySelectorAll(`[onclick="openDayModal('${fecha}')"]`).forEach(cell=>{if(!cell.querySelector('.cumple-globo')){const g=document.createElement('span');g.className='cumple-globo';g.textContent='🎈';g.title='Cumpleaños';cell.style.position='relative';cell.appendChild(g);}});});
+}
+
 // ════════════════════════════════════════════════════════════════════════════
-//  FIN NUEVAS FUNCIONES
+//  FIN FUNCIONES VINCULAR
+// ════════════════════════════════════════════════════════════════════════════
+
 // ════════════════════════════════════════════════════════════════════════════
 
 // ─── RECORDAR SESION ─────────────────────────────────────────────────────────
@@ -5086,6 +5174,174 @@ function loadTheme(){
   }catch(x){}
 }
 loadTheme();
+
+// ════════════════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════════════════
+
+// ─── PATCHES POST-DEFINICIÓN ────────────────────────────────────────────────
+// Estos patches reemplazan funciones originales después de que están definidas
+
+// renderDash: agregar alertas y globos
+{
+  const _orig = renderDash;
+  renderDash = function() { _orig(); renderAlertas(); setTimeout(addCumpleGlobos,200); };
+}
+
+// openTurnoModal: cargar pago y modalidad al editar
+{
+  const _orig = openTurnoModal;
+  openTurnoModal = function(id,prefPac,prefPro,prefDate) {
+    _orig(id,prefPac,prefPro,prefDate);
+    setTimeout(()=>{
+      const sp=document.getElementById('fPago'); if(sp)sp.value='';
+      resetTurnoMod();
+      if(id){const t=TURNOS.find(x=>x.id===id);if(t){if(sp&&t.pago)sp.value=t.pago;if(t.modalidad)selectTurnoMod(t.modalidad);}}
+    },30);
+  };
+}
+
+// closeTurnoModal: limpiar nuevos campos
+{
+  const _orig = closeTurnoModal;
+  closeTurnoModal = function() { _orig(); resetTurnoMod(); const sp=document.getElementById('fPago');if(sp)sp.value=''; };
+}
+
+// saveTurno: persistir pago + modalidad y generar turnos por modalidad
+{
+  const _orig = saveTurno;
+  saveTurno = async function() {
+    const pago=document.getElementById('fPago')?.value||'';
+    const mod=document.getElementById('fMod')?.value||'';
+    const pac=document.getElementById('fPInput').value.trim();
+    const pro=document.getElementById('fProInput').value.trim();
+    const fec=document.getElementById('fF').value;
+    const hor=document.getElementById('fH').value;
+    const isNew=!editTurnoId;
+    const origFrom=db.from.bind(db);
+    db.from=(table)=>{
+      const q=origFrom(table);if(table!=='turnos')return q;
+      const oi=q.insert.bind(q);const ou=q.update.bind(q);
+      q.insert=(data,opts)=>{const extra={...(pago&&{pago}),...(mod&&{modalidad:mod})};if(Array.isArray(data))data=data.map(d=>({...d,...extra}));else data={...data,...extra};return oi(data,opts);};
+      q.update=(data,opts)=>{if(pago)data={...data,pago};if(mod)data={...data,modalidad:mod};return ou(data,opts);};
+      return q;
+    };
+    await _orig();
+    db.from=origFrom;
+    if(isNew&&mod&&mod!=='unico'&&pac&&pro&&fec&&hor) await generarTurnosModalidad(pac,pro,fec,hor,mod);
+  };
+}
+
+// openPacienteModal: cargar campos de alta al editar
+{
+  const _orig = openPacienteModal;
+  openPacienteModal = function(id) {
+    _orig(id);
+    setTimeout(()=>{
+      const cb=document.getElementById('pTieneAlta');if(!cb)return;
+      const fields=document.getElementById('pAltaFields');
+      if(id){
+        const p=PACIENTES.find(x=>x.id===id);
+        if(p&&p.tieneAlta){cb.checked=true;if(fields)fields.style.display='';
+          const vals={pAltaTipo:p.altaTipo||'medica',pAltaFecha:p.altaFecha||'',pAltaDescripcion:p.altaDescripcion||'',pAltaComentarios:p.altaComentarios||''};
+          Object.entries(vals).forEach(([k,v])=>{const el=document.getElementById(k);if(el)el.value=v;});
+        }else{cb.checked=false;if(fields)fields.style.display='none';}
+      }else{
+        cb.checked=false;if(fields)fields.style.display='none';
+        ['pAltaTipo','pAltaFecha','pAltaDescripcion','pAltaComentarios'].forEach(x=>{const el=document.getElementById(x);if(el)el.value='';});
+      }
+    },30);
+  };
+}
+
+// savePaciente: persistir campos de alta
+{
+  const _orig = savePaciente;
+  savePaciente = async function() {
+    const cb=document.getElementById('pTieneAlta');
+    const altaData=cb?.checked?{tiene_alta:true,alta_tipo:document.getElementById('pAltaTipo')?.value||'medica',alta_fecha:document.getElementById('pAltaFecha')?.value||null,alta_descripcion:document.getElementById('pAltaDescripcion')?.value||'',alta_comentarios:document.getElementById('pAltaComentarios')?.value||''}:{tiene_alta:false,alta_tipo:null,alta_fecha:null,alta_descripcion:'',alta_comentarios:''};
+    const origFrom=db.from.bind(db);
+    db.from=(table)=>{
+      const q=origFrom(table);if(table!=='pacientes')return q;
+      const oi=q.insert.bind(q);const ou=q.update.bind(q);
+      q.insert=(data,opts)=>{if(Array.isArray(data))data=data.map(d=>({...d,...altaData}));else data={...data,...altaData};return oi(data,opts);};
+      q.update=(data,opts)=>ou({...data,...altaData},opts);
+      return q;
+    };
+    await _orig();
+    db.from=origFrom;
+  };
+}
+
+// applyStModal: reprogramar automático al cambiar estado + diálogo turno único
+{
+  const _orig = applyStModal;
+  applyStModal = async function() {
+    if(selStat==='reprogramado'){const id=statTgtId;closeStModal();openReprogramarModal(id);return;}
+    const prevId=statTgtId;const prevStat=selStat;
+    await _orig();
+    if(prevId&&(prevStat==='confirmado'||prevStat==='cancelado')){
+      const t=TURNOS.find(x=>x.id===prevId);
+      if(t&&t.modalidad==='unico'){
+        const op=await showUnicoDialog(t);
+        if(!op||op==='nada')return;
+        if(op==='reprogramar'){openReprogramarModal(prevId);return;}
+        await generarTurnosModalidad(t.paciente,t.profesional,t.fecha,t.hora,op);
+        try{await db.from('turnos').update({modalidad:op}).eq('id',prevId);const i=TURNOS.findIndex(x=>x.id===prevId);if(i>=0)TURNOS[i].modalidad=op;}catch(e){}
+      }
+    }
+  };
+}
+
+// renderPacientes: agregar badges de modalidad y alta
+{
+  const _orig = renderPacientes;
+  renderPacientes = function() {
+    const q=(document.getElementById('srchPac').value||'').toLowerCase();
+    const fl=PACIENTES.filter(p=>!q||p.nombre.toLowerCase().includes(q)||p.email.toLowerCase().includes(q)||p.tel.includes(q));
+    document.getElementById('pacSubtitle').textContent=`${fl.length} paciente${fl.length!==1?'s':''} registrado${fl.length!==1?'s':''}`;
+    if(!fl.length){document.getElementById('pacGrid').innerHTML='<div class="empty"><div class="empty-ico">👥</div><div class="empty-txt">No se encontraron pacientes</div></div>';return;}
+    document.getElementById('pacGrid').innerHTML=fl.map(p=>{
+      const ts=TURNOS.filter(t=>t.paciente===p.nombre);const tsConf=ts.filter(t=>t.estado==='confirmado');
+      const total=tsConf.reduce((s,t)=>s+t.importe,0);const edad=calcEdad(p.fechaNac);const pal=avPal(p.nombre);const cumple=esCumple(p.fechaNac);
+      return`<div class="pcard" onclick="openDrawer('pac','${p.id}')" style="${cumple?'border:2px solid #FBBF24;background:linear-gradient(135deg,#FFFBEB,#fff 40%)':''}">
+        ${cumple?'<div style="position:absolute;top:6px;right:8px;font-size:18px">🎈</div>':''}
+        <div class="pcard-top">
+          <div class="pcard-av" style="background:${cumple?'#FBBF24':pal.bg};color:${cumple?'#fff':pal.tx}">${cumple?'🎂':initials(p.nombre)}</div>
+          <div style="flex:1;min-width:0">
+            <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap">
+              <div class="pcard-name">${p.nombre}${cumple?' 🎉':''}</div>
+              ${modBadgeHTML(p.modalidad)}${altaBadgeHTML(p)}
+            </div>
+            <div class="pcard-sub">${cumple?`<span style="color:#B45309;font-weight:600">¡Cumple ${edad} años hoy!</span>`:((edad?edad+' años · ':'')+(p.obraSocial||'Particular'))}</div>
+          </div>
+        </div>
+        <hr class="pcard-divider">
+        <div class="pcard-meta">
+          <div class="pcard-stat"><div class="pcard-stat-val">${ts.length}</div><div class="pcard-stat-lbl">Turnos</div></div>
+          <div class="pcard-stat"><div class="pcard-stat-val">${tsConf.length}</div><div class="pcard-stat-lbl">Asistidos</div></div>
+          <div class="pcard-stat"><div class="pcard-stat-val" style="font-size:13px">$${total>0?fmtMoney(total):'—'}</div><div class="pcard-stat-lbl">Total</div></div>
+        </div></div>`;
+    }).join('');
+  };
+}
+
+// renderTable: agregar pago badge + modalidad badge
+{
+  const _orig = renderTable;
+  renderTable = function() {
+    const q=(document.getElementById('srch').value||'').toLowerCase();
+    const e=document.getElementById('fEst').value;const p=document.getElementById('fProf').value;
+    const fl=TURNOS.filter(t=>{if(q&&!t.paciente.toLowerCase().includes(q)&&!t.profesional.toLowerCase().includes(q))return false;if(e&&t.estado!==e)return false;if(p&&t.profesional!==p)return false;return true;}).sort((a,b)=>b.fecha.localeCompare(a.fecha));
+    document.getElementById('tblBody').innerHTML=fl.length?fl.map(t=>`
+      <tr><td><div class="td-pat">${avDiv(t.paciente,27,9)}${t.paciente} ${modBadgeHTML(t.modalidad)}</div></td>
+      <td>${t.profesional}</td><td>${fmtDate(t.fecha)}</td><td>${t.hora}</td>
+      <td class="td-imp">$${fmtMoney(t.importe)}${t.pago?`<br><span class="pago-badge ${pagoClass(t.pago)}">${pagoLabel(t.pago)}</span>`:''}</td>
+      <td><span class="badge ${stClass(t.estado)}">${stLabel(t.estado)}</span></td>
+      <td>${accionesConReprog(t)}</td></tr>`).join('')
+      :'<tr><td colspan="7" style="text-align:center;padding:30px;color:var(--text-muted)">No se encontraron turnos</td></tr>';
+  };
+}
+
 
 // ─── ARRANQUE ────────────────────────────────────────────────────────────────
 init();
