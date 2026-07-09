@@ -22,25 +22,6 @@
   --s-canc-bg:#F7DEDD;--s-canc-tx:#9B3B34;
   --hol-bg:#F7EDDD;--hol-tx:#8A5A12;
 }
-/* ── Tema Claro ──────────────────────────────── */
-[data-theme="claro"]{
-  --sidebar-bg:#F1F5EF;--sidebar-hover:#E4EAE1;--sidebar-active:#DCE6DD;
-  --primary-light:#DCEAE1;--primary-xlight:#F1F6F3;
-  --text-primary:#282521;--text-secondary:#6C6459;--text-muted:#A79E90;
-  --bg-page:#F8FAFC;--bg-card:#FFFFFF;--border:#E2E8F0;
-  --sidebar-text:rgba(40,37,33,0.72);--sidebar-text-strong:rgba(40,37,33,0.95);
-}
-[data-theme="claro"] .sidebar{border-right:1px solid var(--border);}
-[data-theme="claro"] .sb-logo-icon{background:var(--primary);}
-[data-theme="claro"] .user-av{background:var(--primary-light);color:var(--primary-dark);}
-[data-theme="claro"] .sb-footer{border-top-color:var(--border);}
-/* ── Theme picker ────────────────────────────── */
-.theme-picker{display:flex;gap:6px;padding:8px 14px;}
-.theme-dot{width:22px;height:22px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:all .2s;position:relative;}
-.theme-dot:hover{transform:scale(1.15);}
-.theme-dot.active{border-color:var(--primary);box-shadow:0 0 0 2px var(--bg-page);}
-.theme-dot[data-t="rosa"]{background:linear-gradient(135deg,#375A48,#232A25);}
-.theme-dot[data-t="claro"]{background:linear-gradient(135deg,#F1F5EF,#4C7A63);}
 /* ── Onboarding Wizard ───────────────────────── */
 .wiz-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);backdrop-filter:blur(4px);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;}
 .wiz-card{background:var(--bg-card);border-radius:16px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.15);border:1px solid var(--border);}
@@ -109,6 +90,29 @@ h1,h2,.brand-font{font-family:'Fraunces',serif;}
 .btn-danger:hover{background:#FEE2E2;}
 .pc{padding:18px 26px 26px;flex:1;}
 .kpi-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:18px;}
+.dash-grid{display:grid;grid-template-columns:1.6fr 1fr;gap:16px;align-items:start;}
+.notif-strip{background:var(--bg-card);border-radius:12px;border:1px solid var(--border);margin-bottom:18px;overflow:hidden;}
+.notif-hdr{display:flex;align-items:center;justify-content:space-between;padding:13px 18px;cursor:pointer;user-select:none;}
+.notif-hdr-left{display:flex;align-items:center;gap:9px;}
+.notif-icon{width:28px;height:28px;border-radius:8px;background:var(--s-pend-bg);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.notif-icon svg{width:15px;height:15px;color:var(--s-pend-tx);}
+.notif-title{font-size:13.5px;font-weight:600;}
+.notif-count{background:var(--s-canc-tx);color:#fff;font-size:10px;font-weight:700;padding:1px 7px;border-radius:10px;margin-left:6px;}
+.notif-chevron{width:18px;height:18px;color:var(--text-secondary);transition:transform .2s;}
+.notif-strip.open .notif-chevron{transform:rotate(180deg);}
+.notif-body{max-height:0;overflow:hidden;transition:max-height .25s ease;}
+.notif-strip.open .notif-body{max-height:320px;overflow-y:auto;}
+.notif-item{display:flex;gap:11px;padding:11px 18px;border-top:1px solid #F1EEE6;}
+.notif-dot{width:8px;height:8px;border-radius:50%;margin-top:5px;flex-shrink:0;background:var(--s-repr-tx);}
+.notif-txt{flex:1;}
+.notif-msg{font-size:12.5px;color:var(--text-primary);line-height:1.4;}
+.notif-meta{font-size:11px;color:var(--text-muted);margin-top:2px;}
+.notif-empty{padding:16px 18px;font-size:12.5px;color:var(--text-muted);}
+.day-pop{position:absolute;z-index:60;width:200px;background:#2A2E28;color:#fff;border-radius:12px;padding:12px 14px;box-shadow:0 14px 34px rgba(0,0,0,.28);pointer-events:none;opacity:0;transform:translateY(4px);transition:opacity .12s,transform .12s;font-size:11.5px;}
+.day-pop.show{opacity:1;transform:translateY(0);}
+.day-pop-date{font-weight:700;margin-bottom:6px;}
+.day-pop-row{display:flex;justify-content:space-between;color:rgba(255,255,255,.85);padding:2px 0;}
+@media (max-width:900px){.dash-grid{grid-template-columns:1fr;}}
 .kpi-card{background:var(--bg-card);border-radius:12px;padding:16px 18px;border:1px solid var(--border);}
 .kpi-icon{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;margin-bottom:11px;font-size:16px;}
 .kpi-label{font-size:11.5px;font-weight:500;color:var(--text-secondary);margin-bottom:3px;}
@@ -118,7 +122,7 @@ h1,h2,.brand-font{font-family:'Fraunces',serif;}
 .sec-title{font-size:14.5px;font-weight:600;color:var(--text-primary);}
 .sec-link{font-size:12.5px;color:var(--primary);font-weight:500;cursor:pointer;}
 .sec-link:hover{text-decoration:underline;}
-.cal-wrap{background:var(--bg-card);border-radius:12px;border:1px solid var(--border);margin-bottom:18px;overflow:hidden;}
+.cal-wrap{background:var(--bg-card);border-radius:12px;border:1px solid var(--border);margin-bottom:18px;overflow:visible;position:relative;}
 .cal-hdr{display:flex;align-items:center;gap:7px;padding:14px 18px;border-bottom:1px solid var(--border);}
 .cal-nav-btn{width:27px;height:27px;border-radius:6px;background:transparent;border:1px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);font-size:15px;transition:all .14s;}
 .cal-nav-btn:hover{background:var(--primary-xlight);border-color:var(--primary);color:var(--primary);}
@@ -596,13 +600,6 @@ tbody tr:hover td{background:#F8FDFB;}
       <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>Nosotros
     </a>
   </div>
-  <div style="padding:6px 10px">
-    <div class="sb-label" style="margin-bottom:6px">Tema</div>
-    <div class="theme-picker">
-      <div class="theme-dot active" data-t="rosa" title="Rosa" onclick="setTheme('rosa')"></div>
-      <div class="theme-dot" data-t="claro" title="Claro" onclick="setTheme('claro')"></div>
-    </div>
-  </div>
   <div id="sidebarSedeTag" style="display:none;margin:0 10px 8px;padding:5px 10px;background:rgba(255,255,255,.1);border-radius:6px;font-size:11px;font-weight:600;color:var(--sidebar-text-strong);text-align:center"></div>
   <div class="sb-footer">
     <div class="user-av" id="footerAv">AG</div>
@@ -643,37 +640,45 @@ tbody tr:hover td{background:#F8FDFB;}
       </div>
     </div>
     <div class="pc">
-      <!-- Resumen del día -->
-      <div id="resumeHoy" style="background:#fff;border-radius:12px;border:1px solid var(--border);padding:18px 20px;margin-bottom:18px">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
-          <div style="display:flex;align-items:center;gap:10px">
-            <button onclick="dashNav(-1)" style="width:28px;height:28px;border-radius:50%;border:1px solid var(--border);background:#fff;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);flex-shrink:0">&#8249;</button>
-            <div>
-              <div id="resumeHoyFecha" style="font-size:15px;font-weight:700;color:var(--text-primary)"></div>
-              <div id="resumeHoySub" style="font-size:12px;color:var(--text-muted);margin-top:2px"></div>
-            </div>
-            <button onclick="dashNav(1)" style="width:28px;height:28px;border-radius:50%;border:1px solid var(--border);background:#fff;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);flex-shrink:0">&#8250;</button>
-            <button id="dashHoyBtn" onclick="dashGoToday()" style="display:none;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;border:1px solid var(--primary);background:#fff;cursor:pointer;color:var(--primary);font-family:inherit">Hoy</button>
-          </div>
-          <div id="resumeHoyBadge" style="display:none;font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;background:var(--primary-xlight);color:var(--primary-dark)"></div>
-        </div>
-        <div id="resumeHoyList"></div>
-      </div>
       <div class="kpi-grid" id="kpiGrid"></div>
-      <div class="cal-wrap">
-        <div class="cal-hdr">
-          <button class="cal-nav-btn" onclick="calNav(-1)">‹</button>
-          <div class="cal-month" id="calMonth"></div>
-          <button class="cal-nav-btn" onclick="calNav(1)">›</button>
-          <button class="btn btn-ghost btn-sm" onclick="calToday()">Hoy</button>
+      <div class="notif-strip open" id="notifStrip">
+        <div class="notif-hdr" onclick="toggleNotifStrip()">
+          <div class="notif-hdr-left">
+            <div class="notif-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg></div>
+            <div class="notif-title">Alertas <span class="notif-count" id="notifStripCount" style="display:none">0</span></div>
+          </div>
+          <svg class="notif-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
         </div>
-        <div id="calBody"></div>
+        <div class="notif-body" id="notifStripBody"></div>
       </div>
-      <div class="sec-hdr">
-        <div class="sec-title">Próximos Turnos</div>
-        <span class="sec-link" onclick="showPage('turnos',document.querySelector('[data-page=turnos]'))">Ver todos →</span>
+      <div class="dash-grid">
+        <!-- Resumen del día -->
+        <div id="resumeHoy" style="background:#fff;border-radius:12px;border:1px solid var(--border);padding:18px 20px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+            <div style="display:flex;align-items:center;gap:10px">
+              <button onclick="dashNav(-1)" style="width:28px;height:28px;border-radius:50%;border:1px solid var(--border);background:#fff;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);flex-shrink:0">&#8249;</button>
+              <div>
+                <div id="resumeHoyFecha" style="font-size:15px;font-weight:700;color:var(--text-primary)"></div>
+                <div id="resumeHoySub" style="font-size:12px;color:var(--text-muted);margin-top:2px"></div>
+              </div>
+              <button onclick="dashNav(1)" style="width:28px;height:28px;border-radius:50%;border:1px solid var(--border);background:#fff;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);flex-shrink:0">&#8250;</button>
+              <button id="dashHoyBtn" onclick="dashGoToday()" style="display:none;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;border:1px solid var(--primary);background:#fff;cursor:pointer;color:var(--primary);font-family:inherit">Hoy</button>
+            </div>
+            <div id="resumeHoyBadge" style="display:none;font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;background:var(--primary-xlight);color:var(--primary-dark)"></div>
+          </div>
+          <div id="resumeHoyList"></div>
+        </div>
+        <div class="cal-wrap">
+          <div class="cal-hdr">
+            <button class="cal-nav-btn" onclick="calNav(-1)">‹</button>
+            <div class="cal-month" id="calMonth"></div>
+            <button class="cal-nav-btn" onclick="calNav(1)">›</button>
+            <button class="btn btn-ghost btn-sm" onclick="calToday()">Hoy</button>
+          </div>
+          <div id="calBody"></div>
+          <div class="day-pop" id="dashDayPop"></div>
+        </div>
       </div>
-      <div class="prox-grid" id="proxGrid"></div>
     </div>
   </div>
 
@@ -688,6 +693,7 @@ tbody tr:hover td{background:#F8FDFB;}
       </div>
     </div>
     <div class="pc">
+      <div class="kpi-grid" id="kpiGridTurnos"></div>
       <div class="filters">
         <input type="text" class="s-input" id="srch" placeholder="Buscar paciente o profesional..." oninput="renderTable()">
         <select class="f-sel" id="fEst" onchange="renderTable()">
@@ -698,6 +704,7 @@ tbody tr:hover td{background:#F8FDFB;}
           <option value="reprogramado">Reprogramado</option>
           <option value="cancelado">Cancelado</option>
         </select>
+        <select class="f-sel" id="fEsp" onchange="onEspecialidadChange()"><option value="">Todas las especialidades</option></select>
         <select class="f-sel" id="fProf" onchange="renderTable()"><option value="">Todos los profesionales</option></select>
       </div>
       <div class="tbl-wrap">
@@ -720,6 +727,7 @@ tbody tr:hover td{background:#F8FDFB;}
       </div>
     </div>
     <div class="pc">
+      <div class="kpi-grid" id="kpiGridPacientes"></div>
       <div class="filters">
         <input type="text" class="s-input" id="srchPac" placeholder="Buscar por nombre, email o teléfono..." oninput="renderPacientes()">
       </div>
@@ -804,9 +812,9 @@ tbody tr:hover td{background:#F8FDFB;}
           <div class="fg"><label class="flabel">Email *</label><input type="email" class="finput" id="auEmail" placeholder="usuario@email.com"></div>
           <div class="fg"><label class="flabel">Rol solicitado *</label>
             <select class="fsel" id="auRol">
+              <option value="atencion_cliente">Atención al cliente</option>
+              <option value="administrativo">Administrativo</option>
               <option value="profesional">Profesional</option>
-              <option value="centro">Centro</option>
-              <option value="admin">Admin</option>
             </select>
           </div>
           <div class="fg full"><label class="flabel">Nota para Soporte</label><input type="text" class="finput" id="auNota" placeholder="Contexto adicional (opcional)"></div>
@@ -1255,7 +1263,7 @@ const AV_PALETTES=[
 // ─── NORMALIZACIÓN (snake_case BD → camelCase JS) ────────────────────────────
 const normPac = r => ({id:r.id,nombre:r.nombre,tel:r.tel||'',email:r.email||'',
   fechaNac:r.fecha_nac||'',obraSocial:r.obra_social||'',direccion:r.direccion||'',notas:r.notas||'',
-  profesionalAsignado:r.profesional_asignado||'',avatarUrl:r.avatar_url||'',sede_id:r.sede_id||null});
+  profesionalAsignado:r.profesional_asignado||'',avatarUrl:r.avatar_url||'',sede_id:r.sede_id||null,fechaAlta:r.created_at||''});
 const normPro = r => ({id:r.id,nombre:r.nombre,especialidad:r.especialidad||'',
   tel:r.tel||'',email:r.email||'',tarifa:Number(r.tarifa)||0,
   matricula:r.matricula||'',disponibilidad:r.disponibilidad||'',notas:r.notas||'',avatarUrl:r.avatar_url||'',sede_id:r.sede_id||null});
@@ -1531,7 +1539,7 @@ function showPage(p,el){
 }
 
 // ─── DASHBOARD ────────────────────────────────────────────────────────────────
-function renderDash(){renderResumenHoy();renderKPIs();renderCalendar();renderProximos();}
+function renderDash(){renderResumenHoy();renderKPIs();renderCalendar();renderNotifStrip();}
 function weekOf(d){
   const c=new Date(d);const dow=c.getDay();const diff=dow===0?-6:1-dow;c.setDate(c.getDate()+diff);
   const dates=[];for(let i=0;i<7;i++){const dd=new Date(c);dd.setDate(c.getDate()+i);dates.push({d:dd,s:fmt(dd)});}return dates;
@@ -1600,6 +1608,37 @@ function renderResumenHoy(){
     </div>`).join('');
 }
 
+function toggleNotifStrip(){document.getElementById('notifStrip').classList.toggle('open');}
+function timeAgo(iso){
+  const diffMs=Date.now()-new Date(iso).getTime();
+  const min=Math.floor(diffMs/60000);
+  if(min<1)return'ahora';
+  if(min<60)return'Hace '+min+' min';
+  const hr=Math.floor(min/60);
+  if(hr<24)return'Hace '+hr+' h';
+  return'Hace '+Math.floor(hr/24)+' d';
+}
+function renderNotifStrip(){
+  const strip=document.getElementById('notifStrip');
+  if(!strip)return;
+  const unread=NOTIFICACIONES.filter(n=>!n.leida);
+  const countEl=document.getElementById('notifStripCount');
+  if(unread.length){countEl.textContent=unread.length;countEl.style.display='inline';}
+  else countEl.style.display='none';
+  const body=document.getElementById('notifStripBody');
+  if(!NOTIFICACIONES.length){
+    body.innerHTML='<div class="notif-empty">Sin alertas por el momento.</div>';
+    return;
+  }
+  body.innerHTML=NOTIFICACIONES.slice(0,10).map(n=>`
+    <div class="notif-item" onclick="markRead('${n.id}');renderNotifStrip()" style="cursor:pointer;${n.leida?'opacity:.6':''}">
+      <div class="notif-dot ${n.leida?'':'info'}" style="${n.leida?'background:var(--text-muted)':''}"></div>
+      <div class="notif-txt">
+        <div class="notif-msg">${n.mensaje}</div>
+        <div class="notif-meta">${timeAgo(n.created_at)}</div>
+      </div>
+    </div>`).join('');
+}
 function renderKPIs(){
   const dia=TURNOS.filter(t=>t.fecha===dashDay);
   const conf=dia.filter(t=>t.estado==='confirmado').length;
@@ -1628,6 +1667,30 @@ function setCV(v){
 }
 function calNav(d){if(calView==='semanal')calDate.setDate(calDate.getDate()+d*7);else calDate.setMonth(calDate.getMonth()+d);renderCalendar();}
 function calToday(){calDate=new Date(TODAY);renderCalendar();}
+function showDashDayPop(s,el){
+  const pop=document.getElementById('dashDayPop');
+  if(!pop)return;
+  const ts=TURNOS.filter(t=>t.fecha===s);
+  const wrap=el.closest('.cal-wrap');
+  let body;
+  if(!ts.length){
+    body='<div style="color:rgba(255,255,255,.6)">Sin turnos agendados</div>';
+  }else{
+    const counts={};
+    ts.forEach(t=>{counts[t.estado]=(counts[t.estado]||0)+1;});
+    const rows=Object.entries(counts).map(([k,v])=>`<div class="day-pop-row"><span>${stLabel(k)}</span><span>${v}</span></div>`).join('');
+    body=`<div class="day-pop-row" style="font-weight:700;color:#fff;border-bottom:1px solid rgba(255,255,255,.15);padding-bottom:5px;margin-bottom:3px"><span>Total</span><span>${ts.length}</span></div>${rows}`;
+  }
+  const[y,m,d]=s.split('-');
+  pop.innerHTML=`<div class="day-pop-date">${parseInt(d)}/${m}</div>${body}`;
+  const rect=el.getBoundingClientRect(),wrapRect=wrap.getBoundingClientRect();
+  pop.style.left=Math.max(4,rect.left-wrapRect.left+rect.width/2-100)+'px';
+  requestAnimationFrame(()=>{
+    pop.style.top=(rect.top-wrapRect.top-pop.offsetHeight-8)+'px';
+    pop.classList.add('show');
+  });
+}
+function hideDashDayPop(){const p=document.getElementById('dashDayPop');if(p)p.classList.remove('show');}
 function renderCalendar(){
   const MN=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
   const DN=['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
@@ -1664,29 +1727,11 @@ function renderCalendar(){
         const blqProprio=DIAS_BLOQUEADOS.find(x=>x.fecha===s&&x.sede_id===currentSedeId);
         const blqClass=noLab?' nolab':'';
         const blqMark=blqProprio?'<div class="mon-blq" title="'+blqProprio.motivo+'">🚫</div>':(noLab&&!fer?'<div class="mon-blq" title="'+diaInfo.motivo+'">·</div>':'');
-        return `<div class="mon-cell${o?' other':''}${blqClass}" onclick="openDayModal('${s}')"><div class="mon-dnum${isT?' today':''}${fer&&!isT?' holiday':''}">${d.getDate()}</div>
+        return `<div class="mon-cell${o?' other':''}${blqClass}" onclick="openDayModal('${s}')" onmouseenter="showDashDayPop('${s}',this)" onmouseleave="hideDashDayPop()"><div class="mon-dnum${isT?' today':''}${fer&&!isT?' holiday':''}">${d.getDate()}</div>
           ${fer?`<div class="mon-hol">${fer}</div>`:''}${blqMark}${cnt>0?`<div class="mon-count">${cnt} turno${cnt>1?'s':''}</div>`:''}</div>`;
        }).join('')}</div>`;
   }
 }
-function renderProximos(){
-  let base=TURNOS;
-  if(!isAdmin){
-    if(currentProfesional) base=TURNOS.filter(t=>t.profesional===currentProfesional.nombre);
-    else base=[];
-  }
-  const up=base.filter(t=>t.fecha>=TSTR&&t.estado!=='cancelado').sort((a,b)=>a.fecha.localeCompare(b.fecha)||a.hora.replace(/^(\d):/, '0$1:').localeCompare(b.hora.replace(/^(\d):/,'0$1:'))).slice(0,3);
-  const btnLabel=isAdmin?'Ver / Editar':'Solicitar cambio';
-  const btnAct=t=>isAdmin?`openTurnoModal('${t.id}')`:`openSolicitudModal('${t.id}')`;
-  document.getElementById('proxGrid').innerHTML=up.length?up.map(t=>`
-    <div class="tc"><div class="tc-top"><span class="badge ${stClass(t.estado)}">${stLabel(t.estado)}</span><span class="tc-date">${fmtDate(t.fecha)} · ${t.hora}</span></div>
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">${avDiv(t.paciente,32,10)}
-    <div><div class="tc-name">${t.paciente}</div><div class="tc-prof">${t.profesional}</div></div></div>
-    <div class="tc-meta"><span>💰</span><span class="tc-imp">$${t.importe.toLocaleString('es-AR')}</span>${t.notas?`<span>📝 ${t.notas}</span>`:''}</div>
-    <button class="tc-btn" style="margin-top:10px" onclick="${btnAct(t)}">${btnLabel}</button></div>`).join('')
-    :'<div class="empty" style="grid-column:1/-1"><div class="empty-ico">📅</div><div class="empty-txt">No hay próximos turnos</div></div>';
-}
-
 // ─── MODAL DÍA ────────────────────────────────────────────────────────────────
 function openDayModal(s){
   const MN=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
@@ -1752,15 +1797,43 @@ function closeDayModal(){document.getElementById('moDia').classList.remove('open
 function populateProfFilter(){
   const ps=[...new Set(TURNOS.map(t=>t.profesional))].sort();
   document.getElementById('fProf').innerHTML='<option value="">Todos los profesionales</option>'+ps.map(p=>`<option>${p}</option>`).join('');
+  const esps=[...new Set(PROFESIONALES.map(p=>p.especialidad).filter(Boolean))].sort();
+  document.getElementById('fEsp').innerHTML='<option value="">Todas las especialidades</option>'+esps.map(e=>`<option>${e}</option>`).join('');
+}
+function onEspecialidadChange(){
+  const esp=document.getElementById('fEsp').value;
+  const ps=esp?PROFESIONALES.filter(p=>p.especialidad===esp).map(p=>p.nombre).sort():[...new Set(TURNOS.map(t=>t.profesional))].sort();
+  document.getElementById('fProf').innerHTML='<option value="">Todos los profesionales</option>'+ps.map(p=>`<option>${p}</option>`).join('');
+  renderTable();
+}
+function renderKPIsTurnos(){
+  const el=document.getElementById('kpiGridTurnos');
+  if(!el)return;
+  const asignados=TURNOS.length;
+  const realizados=TURNOS.filter(t=>t.estado==='confirmado').length;
+  const cancelados=TURNOS.filter(t=>t.estado==='cancelado').length;
+  const kpis=[
+    {label:'Turnos asignados',val:asignados,note:'Total histórico',ico:'📅',bg:'#F1F6F3'},
+    {label:'Realizados',val:realizados,note:asignados?Math.round(realizados/asignados*100)+'% del total':'—',ico:'✓',bg:'#DEEFE5'},
+    {label:'Cancelados',val:cancelados,note:asignados?Math.round(cancelados/asignados*100)+'% del total':'—',ico:'✕',bg:'#F7DEDD'},
+  ];
+  el.innerHTML=kpis.map(k=>`
+    <div class="kpi-card"><div class="kpi-icon" style="background:${k.bg}">${k.ico}</div>
+    <div class="kpi-label">${k.label}</div><div class="kpi-number">${k.val}</div>
+    <div class="kpi-note">${k.note}</div></div>`).join('');
 }
 function renderTable(){
+  renderKPIsTurnos();
   const q=(document.getElementById('srch').value||'').toLowerCase();
   const e=document.getElementById('fEst').value;
   const p=document.getElementById('fProf').value;
+  const esp=document.getElementById('fEsp').value;
+  const profsDeEsp=esp?new Set(PROFESIONALES.filter(pr=>pr.especialidad===esp).map(pr=>pr.nombre)):null;
   const fl=TURNOS.filter(t=>{
     if(q&&!t.paciente.toLowerCase().includes(q)&&!t.profesional.toLowerCase().includes(q))return false;
     if(e&&t.estado!==e)return false;
     if(p&&t.profesional!==p)return false;
+    if(profsDeEsp&&!profsDeEsp.has(t.profesional))return false;
     return true;
   }).sort((a,b)=>b.fecha.localeCompare(a.fecha));
   const acciones=(isAdmin||isCentro)
@@ -1919,7 +1992,31 @@ async function applyStModal(){
 }
 
 // ─── PACIENTES ────────────────────────────────────────────────────────────────
+function renderKPIsPacientes(){
+  const el=document.getElementById('kpiGridPacientes');
+  if(!el)return;
+  const hoy=new Date();
+  const limite=new Date();limite.setDate(limite.getDate()-60);
+  const limiteStr=fmt(limite);
+  const nombresActivos=new Set(TURNOS.filter(t=>t.fecha>=limiteStr&&t.estado!=='cancelado').map(t=>t.paciente));
+  const total=PACIENTES.length;
+  const activos=PACIENTES.filter(p=>nombresActivos.has(p.nombre)).length;
+  const baja=total-activos;
+  const mesActual=hoy.toISOString().slice(0,7);
+  const nuevos=PACIENTES.filter(p=>p.fechaAlta&&p.fechaAlta.slice(0,7)===mesActual).length;
+  const kpis=[
+    {label:'Total de pacientes',val:total,note:'Histórico',ico:'👥',bg:'#F1F6F3'},
+    {label:'Activos',val:activos,note:'Con turnos últimos 60 días',ico:'✓',bg:'#DEEFE5'},
+    {label:'De baja',val:baja,note:'Sin actividad reciente',ico:'✕',bg:'#F7DEDD'},
+    {label:'Nuevos este mes',val:nuevos,note:'Altas del mes',ico:'✨',bg:'#F1F6F3'},
+  ];
+  el.innerHTML=kpis.map(k=>`
+    <div class="kpi-card"><div class="kpi-icon" style="background:${k.bg}">${k.ico}</div>
+    <div class="kpi-label">${k.label}</div><div class="kpi-number">${k.val}</div>
+    <div class="kpi-note">${k.note}</div></div>`).join('');
+}
 function renderPacientes(){
+  renderKPIsPacientes();
   const q=(document.getElementById('srchPac').value||'').toLowerCase();
   const fl=PACIENTES.filter(p=>!q||p.nombre.toLowerCase().includes(q)||p.email.toLowerCase().includes(q)||p.tel.includes(q));
   document.getElementById('pacSubtitle').textContent=`${fl.length} paciente${fl.length!==1?'s':''} registrado${fl.length!==1?'s':''}`;
@@ -2233,7 +2330,9 @@ function buildProfesionalDrawer(id){
 
 // ─── FINANCIERO ──────────────────────────────────────────────────────────────
 function renderFin(){
-  const comp=TURNOS.filter(t=>t.estado==='confirmado');
+  const mesActual=new Date().toISOString().slice(0,7);
+  const delMes=t=>t.fecha.slice(0,7)===mesActual;
+  const comp=TURNOS.filter(t=>t.estado==='confirmado'&&delMes(t));
   const total=comp.reduce((s,t)=>s+t.importe,0);
   const byProf={};comp.forEach(t=>{byProf[t.profesional]=(byProf[t.profesional]||0)+t.importe;});
   const rows=Object.entries(byProf).sort((a,b)=>b[1]-a[1]).map(([p,v])=>`
@@ -2242,12 +2341,12 @@ function renderFin(){
     <td class="td-imp">$${v.toLocaleString('es-AR')}</td></tr>`).join('');
   document.getElementById('finContent').innerHTML=`
     <div class="kpi-grid" style="margin-bottom:18px">
-      <div class="kpi-card"><div class="kpi-icon" style="background:#D4F4EB">💰</div><div class="kpi-label">Ingresos confirmados</div><div class="kpi-number" style="font-size:22px">$${total.toLocaleString('es-AR')}</div><div class="kpi-note">Turnos en estado Confirmado</div></div>
-      <div class="kpi-card"><div class="kpi-icon" style="background:#D4F4EB">📊</div><div class="kpi-label">Turnos confirmados</div><div class="kpi-number">${comp.length}</div><div class="kpi-note">Total de turnos activos</div></div>
-      <div class="kpi-card"><div class="kpi-icon" style="background:#FFF3CD">⏳</div><div class="kpi-label">Pendientes de cobro</div><div class="kpi-number" style="font-size:22px">$${TURNOS.filter(t=>t.estado==='pendiente').reduce((s,t)=>s+t.importe,0).toLocaleString('es-AR')}</div><div class="kpi-note">Si se confirman</div></div>
-      <div class="kpi-card"><div class="kpi-icon" style="background:#FFE4E4">✕</div><div class="kpi-label">Perdido (cancelados)</div><div class="kpi-number" style="font-size:22px">$${TURNOS.filter(t=>t.estado==='cancelado').reduce((s,t)=>s+t.importe,0).toLocaleString('es-AR')}</div><div class="kpi-note">Turnos cancelados</div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:#D4F4EB">💰</div><div class="kpi-label">Ingresos del mes</div><div class="kpi-number" style="font-size:22px">$${total.toLocaleString('es-AR')}</div><div class="kpi-note">Turnos confirmados este mes</div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:#D4F4EB">📊</div><div class="kpi-label">Turnos confirmados</div><div class="kpi-number">${comp.length}</div><div class="kpi-note">Este mes</div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:#FFF3CD">⏳</div><div class="kpi-label">Pendientes de cobro</div><div class="kpi-number" style="font-size:22px">$${TURNOS.filter(t=>t.estado==='pendiente'&&delMes(t)).reduce((s,t)=>s+t.importe,0).toLocaleString('es-AR')}</div><div class="kpi-note">Este mes, si se confirman</div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:#FFE4E4">✕</div><div class="kpi-label">Perdido (cancelados)</div><div class="kpi-number" style="font-size:22px">$${TURNOS.filter(t=>t.estado==='cancelado'&&delMes(t)).reduce((s,t)=>s+t.importe,0).toLocaleString('es-AR')}</div><div class="kpi-note">Turnos cancelados este mes</div></div>
     </div>
-    <div class="sec-hdr"><div class="sec-title">Ingresos por profesional</div></div>
+    <div class="sec-hdr"><div class="sec-title">Ingresos por profesional (este mes)</div></div>
     <div class="tbl-wrap"><table><thead><tr><th>Profesional</th><th>Turnos</th><th>Total</th></tr></thead><tbody>${rows||'<tr><td colspan="3" style="text-align:center;padding:20px;color:var(--text-muted)">Sin datos aún</td></tr>'}</tbody></table></div>`;
 }
 
@@ -3412,21 +3511,6 @@ function updateSidebarCentro(){
   // Show edit pencil for centro role
   if(isCentro){document.getElementById('editProfileBtn').style.display='flex';}
 }
-
-// ─── TEMA ────────────────────────────────────────────────────────────────────
-function setTheme(t){
-  if(t!=='rosa'&&t!=='claro')t='rosa';
-  document.documentElement.setAttribute('data-theme',t==='rosa'?'':t);
-  document.querySelectorAll('.theme-dot').forEach(d=>d.classList.toggle('active',d.dataset.t===t));
-  try{localStorage.setItem('vincular_theme',t);}catch(x){}
-}
-function loadTheme(){
-  try{
-    const t=localStorage.getItem('vincular_theme')||'rosa';
-    setTheme(t);
-  }catch(x){}
-}
-loadTheme();
 
 // ─── ARRANQUE ────────────────────────────────────────────────────────────────
 init();
