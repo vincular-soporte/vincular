@@ -641,10 +641,10 @@ tbody tr:hover td{background:#F8FDFB;}
     </div>
     <div class="pc">
       <div class="kpi-grid" id="kpiGrid"></div>
-      <div class="notif-strip open" id="notifStrip">
+      <div class="notif-strip" id="notifStrip">
         <div class="notif-hdr" onclick="toggleNotifStrip()">
           <div class="notif-hdr-left">
-            <div class="notif-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg></div>
+            <div class="notif-icon" style="position:relative"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg><span id="notifBellDot" style="display:none;position:absolute;top:2px;right:2px;width:8px;height:8px;border-radius:50%;background:var(--s-canc-tx);border:2px solid #fff"></span></div>
             <div class="notif-title">Alertas <span class="notif-count" id="notifStripCount" style="display:none">0</span></div>
           </div>
           <svg class="notif-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
@@ -828,8 +828,17 @@ tbody tr:hover td{background:#F8FDFB;}
     </div>
   </div>
   <div id="page-solicitudes" class="page">
-    <div class="ph"><div><div class="ph-title">Solicitudes</div><div class="ph-sub">Cambios propuestos por profesionales</div></div></div>
-    <div class="pc"><div id="solicitudesContent"></div></div>
+    <div class="ph"><div><div class="ph-title">Solicitudes</div><div class="ph-sub">Turnos solicitados y cambios propuestos</div></div></div>
+    <div class="pc">
+      <div class="sec-hdr">
+        <div class="sec-title">Solicitudes de turno (formulario público) <span class="notif-count" id="solPubCount" style="display:none"></span></div>
+      </div>
+      <div id="solicitudesPublicasContent" style="margin-bottom:24px"></div>
+      <div class="sec-hdr">
+        <div class="sec-title">Cambios propuestos por profesionales</div>
+      </div>
+      <div id="solicitudesContent"></div>
+    </div>
   </div>
 
   <!-- SOPORTE -->
@@ -966,6 +975,14 @@ tbody tr:hover td{background:#F8FDFB;}
           </select>
         </div>
         <div class="fg full"><label class="flabel">Notas</label><textarea class="ftxt" id="fN" placeholder="Observaciones..."></textarea></div>
+      </div>
+      <div id="reagendarBox" style="display:none;margin-top:6px;background:var(--primary-xlight);border-radius:10px;padding:12px 14px">
+        <div style="font-size:12.5px;font-weight:600;color:var(--primary-dark);margin-bottom:8px">↻ Reagendar próxima sesión</div>
+        <div style="font-size:11.5px;color:var(--text-secondary);margin-bottom:10px">Crea un turno nuevo para este mismo paciente y profesional, en el mismo horario, sin tocar este turno — así reservás el próximo lugar antes de que lo tome otra persona.</div>
+        <div style="display:flex;gap:8px">
+          <button type="button" class="tc-btn" style="width:auto;padding:8px 14px" onclick="reagendarProxima(7)">Semanal (+7 días)</button>
+          <button type="button" class="tc-btn" style="width:auto;padding:8px 14px" onclick="reagendarProxima(14)">Quincenal (+14 días)</button>
+        </div>
       </div>
     </div>
     <div class="md-ftr">
@@ -1532,7 +1549,7 @@ function showPage(p,el){
   if(p==='financiero')renderFin();
   if(p==='agenda')renderAgenda();
   if(p==='usuarios')renderUsuarios();
-  if(p==='solicitudes')renderSolicitudes();
+  if(p==='solicitudes'){renderSolicitudes();renderSolicitudesPublicas();}
   if(p==='soporte')initSoporte();
   if(p==='rendimiento')renderRendimiento();
   if(p==='panel-control')renderPanelControl();
@@ -1625,6 +1642,8 @@ function renderNotifStrip(){
   const countEl=document.getElementById('notifStripCount');
   if(unread.length){countEl.textContent=unread.length;countEl.style.display='inline';}
   else countEl.style.display='none';
+  const dot=document.getElementById('notifBellDot');
+  if(dot)dot.style.display=unread.length?'block':'none';
   const body=document.getElementById('notifStripBody');
   if(!NOTIFICACIONES.length){
     body.innerHTML='<div class="notif-empty">Sin alertas por el momento.</div>';
@@ -1891,6 +1910,7 @@ document.addEventListener('click',e=>{
 function openTurnoModal(id,prefPac,prefPro,prefDate){
   editTurnoId=id||null;
   document.getElementById('mdTurnoTitle').textContent=id?'Editar Turno':'Nuevo Turno';
+  document.getElementById('reagendarBox').style.display=id?'block':'none';
   const proInput=document.getElementById('fProInput');
   if(id){
     const t=TURNOS.find(x=>x.id===id);
@@ -1923,6 +1943,23 @@ function openTurnoModal(id,prefPac,prefPro,prefDate){
 }
 function closeTurnoModal(){document.getElementById('moTurno').classList.remove('open');editTurnoId=null;resetTimePicker();}
 
+async function reagendarProxima(dias){
+  if(!editTurnoId)return;
+  const actual=TURNOS.find(t=>t.id===editTurnoId);
+  if(!actual)return;
+  const d=new Date(actual.fecha+'T00:00');
+  d.setDate(d.getDate()+dias);
+  const nuevaFecha=fmt(d);
+  const yaExiste=TURNOS.some(t=>t.profesional===actual.profesional&&t.fecha===nuevaFecha&&t.hora===actual.hora&&t.estado!=='cancelado');
+  if(yaExiste&&!confirm('Ya hay un turno para '+actual.profesional+' ese día y horario. ¿Crear igual?'))return;
+  const payload={paciente:actual.paciente,profesional:actual.profesional,fecha:nuevaFecha,hora:actual.hora,importe:actual.importe,estado:'pendiente_confirmar',notas:'Reagendado automáticamente desde el turno del '+fmtDate(actual.fecha),...(currentSedeId&&{sede_id:currentSedeId})};
+  const{data:row,error}=await db.from('turnos').insert(payload).select().single();
+  if(error){toast('❌ No se pudo reagendar',true);return;}
+  TURNOS.unshift(normTur(row));
+  toast('✓ Próxima sesión reservada para el '+fmtDate(nuevaFecha));
+  renderDash();
+  if(document.getElementById('page-turnos').classList.contains('active'))renderTable();
+}
 async function saveTurno(){
   const pac=document.getElementById('fPInput').value.trim();
   const pro=document.getElementById('fProInput').value.trim();
@@ -2042,7 +2079,7 @@ function renderPacientes(){
       </div></div>`;
   }).join('');
 }
-function openPacienteModal(id){
+function openPacienteModal(id,prefill){
   editPacId=id||null;
   document.getElementById('mdPacTitle').textContent=id?'Editar Paciente':'Nuevo Paciente';
   const selPro=document.getElementById('pProfAsignado');
@@ -2065,6 +2102,11 @@ function openPacienteModal(id){
     ['pNombre','pTel','pEmail','pFechaNac','pObraSocial','pDireccion','pNotas'].forEach(x=>document.getElementById(x).value='');
     selPro.value='';prev.style.backgroundImage='';prev.innerHTML='👤';
     if(!isAdmin&&currentProfesional)selPro.value=currentProfesional.nombre;
+    if(prefill){
+      document.getElementById('pNombre').value=prefill.nombre||'';
+      document.getElementById('pTel').value=prefill.tel||'';
+      document.getElementById('pNotas').value=prefill.notas||'';
+    }
   }
   document.getElementById('moPac').classList.add('open');
   setTimeout(()=>document.getElementById('pNombre').focus(),60);
@@ -2752,6 +2794,72 @@ async function rejectSolicitud(id){
   const si=SOLICITUDES.findIndex(x=>x.id===id);
   if(si>=0){SOLICITUDES[si].estado='rechazado';SOLICITUDES[si].notaAdmin=nota;}
   toast('Solicitud rechazada');renderSolicitudes();renderKPIs();
+}
+
+// ─── SOLICITUDES DE TURNO PÚBLICAS (formulario en redes) ──────────────────────
+let SOLICITUDES_PUBLICAS=[];
+const stSolPub={pendiente:{bg:'#FFF3CD',tx:'#856404',lbl:'Pendiente'},contactado:{bg:'#E5E6F4',tx:'#4A4E8C',lbl:'Contactado'},asignado:{bg:'#D4F4EB',tx:'#0D5C4A',lbl:'Asignado'},descartado:{bg:'#FFE4E4',tx:'#B91C1C',lbl:'Descartado'}};
+async function renderSolicitudesPublicas(){
+  const el=document.getElementById('solicitudesPublicasContent');
+  if(!el)return;
+  try{
+    const{data,error}=await db.from('solicitudes_turno_publico').select('*').order('created_at',{ascending:false});
+    if(error)throw error;
+    SOLICITUDES_PUBLICAS=data||[];
+  }catch(e){el.innerHTML='<div style="color:var(--text-muted);font-size:13px">No se pudo cargar (¿existe la tabla solicitudes_turno_publico?)</div>';return;}
+  const pend=SOLICITUDES_PUBLICAS.filter(s=>s.estado==='pendiente');
+  const cEl=document.getElementById('solPubCount');
+  if(pend.length){cEl.textContent=pend.length;cEl.style.display='inline';}else cEl.style.display='none';
+  if(!SOLICITUDES_PUBLICAS.length){el.innerHTML='<div style="color:var(--text-muted);font-size:13px">Sin solicitudes por ahora.</div>';return;}
+  el.innerHTML=SOLICITUDES_PUBLICAS.map(s=>{
+    const st=stSolPub[s.estado]||stSolPub.pendiente;
+    const nombreCompleto=(s.nombre+' '+s.apellido).trim();
+    return `<div style="background:#fff;border-radius:12px;border:1px solid var(--border);padding:16px 18px;margin-bottom:10px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <div style="display:flex;align-items:center;gap:10px">
+          ${avDiv(nombreCompleto,34,11)}
+          <div><div style="font-size:13.5px;font-weight:600;color:var(--text-primary)">${nombreCompleto} <span style="font-weight:400;color:var(--text-muted)">· ${s.edad||'—'} años</span></div>
+          <div style="font-size:11.5px;color:var(--text-secondary)">${s.dia_preferido||'—'} ${s.hora_preferido||''} · ${s.modalidad||''} · ${s.frecuencia||''}</div></div>
+        </div>
+        <span style="background:${st.bg};color:${st.tx};font-size:10.5px;font-weight:600;padding:3px 8px;border-radius:20px;flex-shrink:0">${st.lbl}</span>
+      </div>
+      <div style="background:var(--primary-xlight);border-radius:8px;padding:10px 12px;font-size:12.5px;color:var(--text-secondary);margin-bottom:12px">
+        <div><b>WhatsApp:</b> ${s.whatsapp}${s.ya_hizo_terapia?' · Ya hizo terapia antes':''}</div>
+        ${s.motivo?`<div style="margin-top:4px"><b>Motivo:</b> ${s.motivo}</div>`:''}
+      </div>
+      ${s.estado==='descartado'?'':`
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="tc-btn" style="width:auto;padding:8px 14px" onclick="agregarPacienteDeSolicitud('${s.id}')">+ Agregar paciente</button>
+        <button class="tc-btn" style="width:auto;padding:8px 14px" onclick="agregarTurnoDeSolicitud('${s.id}')">+ Agregar turno</button>
+        ${s.estado==='pendiente'?`<button class="tc-btn" style="width:auto;padding:8px 14px;background:transparent;color:var(--text-secondary);border:1px solid var(--border)" onclick="marcarSolicitudPublica('${s.id}','contactado')">Marcar contactado</button>`:''}
+        <button class="tc-btn" style="width:auto;padding:8px 14px;background:transparent;color:#B91C1C;border:1px solid var(--border)" onclick="marcarSolicitudPublica('${s.id}','descartado')">Descartar</button>
+      </div>`}
+    </div>`;
+  }).join('');
+}
+async function marcarSolicitudPublica(id,estado){
+  const{error}=await db.from('solicitudes_turno_publico').update({estado}).eq('id',id);
+  if(error){toast('❌ Error',true);return;}
+  renderSolicitudesPublicas();
+}
+function agregarPacienteDeSolicitud(id){
+  const s=SOLICITUDES_PUBLICAS.find(x=>x.id===id);if(!s)return;
+  openPacienteModal(null,{nombre:(s.nombre+' '+s.apellido).trim(),tel:s.whatsapp,notas:'Vía formulario público · Motivo: '+(s.motivo||'—')});
+}
+function agregarTurnoDeSolicitud(id){
+  const s=SOLICITUDES_PUBLICAS.find(x=>x.id===id);if(!s)return;
+  const dowMap={'Lunes':1,'Martes':2,'Miércoles':3,'Jueves':4,'Viernes':5};
+  const wd=dowMap[s.dia_preferido];
+  let fecha=TSTR;
+  if(wd){
+    const d=new Date();d.setHours(0,0,0,0);
+    let diff=wd-d.getDay(); if(diff<=0)diff+=7;
+    d.setDate(d.getDate()+diff);
+    fecha=fmt(d);
+  }
+  openTurnoModal(null,(s.nombre+' '+s.apellido).trim(),null,fecha);
+  if(s.hora_preferido)setTimeout(()=>{document.getElementById('fH').value=s.hora_preferido;buildTimePicker(s.hora_preferido);},80);
+  marcarSolicitudPublica(id,'asignado');
 }
 
 async function renderSolicitudes(){
